@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SilviGrow - Sistem Monitoring Silvikultur V18 Final Release</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f1f5f2;color:#26352b}
+header{background:#14532d;color:#fff;padding:22px}
+header h1{margin:0;font-size:28px} header p{margin:6px 0 0}
+.container{max-width:1200px;margin:auto;padding:22px}
+.dashboard{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.card,.box{background:#fff;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+.card{padding:16px}.card h3{margin:0;color:#166534;font-size:14px}.number{font-size:25px;font-weight:bold;margin-top:8px}.card p{font-size:11px;color:#64748b;margin:5px 0 0}
+.box{padding:20px;margin-bottom:20px}.box h2{margin:0 0 15px;color:#14532d;font-size:20px}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+label{display:block;font-weight:bold;font-size:13px;margin-bottom:5px}
+input,select{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:7px;background:#fff}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+button{border:0;border-radius:7px;padding:9px 13px;cursor:pointer;font-weight:bold}
+.btn-simpan{background:#166534;color:#fff}.btn-secondary{background:#475569;color:#fff}.btn-info{background:#2563eb;color:#fff}.btn-edit{background:#d97706;color:#fff;padding:6px 9px}.btn-hapus{background:#dc2626;color:#fff;padding:6px 9px}.btn-print{background:#7c3aed;color:#fff}
+.filter-grid{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:1000px}
+th{background:#166534;color:#fff;padding:9px;text-align:left}td{padding:9px;border-bottom:1px solid #e2e8f0}
+.status-baik{color:#15803d;font-weight:bold}.status-sedang{color:#b45309;font-weight:bold}.status-buruk{color:#dc2626;font-weight:bold}
+.info{background:#ecfdf5;border-left:4px solid #16a34a;padding:10px;margin-bottom:15px;font-size:12px}
+.grafik-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.grafik-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px;background:#fff}
+.grafik-card h3{font-size:14px;margin:0 0 10px;color:#166534}
+.bar-chart{height:210px;display:flex;align-items:flex-end;gap:12px;border-bottom:1px solid #cbd5e1;padding:10px;overflow-x:auto}
+.bar-item{min-width:55px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.bar{width:30px;background:#166534;border-radius:5px 5px 0 0;min-height:4px}.bar-value{font-size:10px;margin-bottom:3px}.bar-label{font-size:9px;text-align:center;max-width:75px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{padding:22px;text-align:center;color:#64748b}
+.badge{display:inline-block;background:#dcfce7;color:#166534;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold}
+.small{font-size:11px;color:#64748b}
+.report-title{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.toast{position:fixed;right:20px;bottom:20px;background:#14532d;color:#fff;padding:12px 16px;border-radius:8px;display:none;z-index:99}
+@media(max-width:1000px){.dashboard{grid-template-columns:repeat(3,1fr)}.form-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.dashboard{grid-template-columns:repeat(2,1fr)}.form-grid,.grafik-grid,.filter-grid{grid-template-columns:1fr}.container{padding:12px}}
+@media print{
+header,.form-box,.toolbar,.search,.filter-grid,.grafik-box,.aksi-col,.no-print{display:none!important}
+.container{max-width:none;padding:5px}.box{box-shadow:none;border:1px solid #ddd}.dashboard{grid-template-columns:repeat(6,1fr)!important}
+body{background:#fff}
+}
+
+textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;resize:vertical;font-family:inherit}
+.analysis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.analysis-card{border:1px solid #e2e8f0;border-radius:10px;padding:16px;background:#fff}
+.analysis-label{font-weight:bold;color:#475569;font-size:13px}
+.analysis-number{font-size:28px;font-weight:bold;margin:6px 0 10px}
+.progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+.progress span{display:block;height:100%;width:0;background:#166534;border-radius:99px;transition:width .3s}
+.small-number{font-size:18px;line-height:30px}
+@media(max-width:650px){.analysis-grid{grid-template-columns:1fr}}
+
+.v6-link{display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:6px 9px;border-radius:6px;font-size:11px;font-weight:bold}.v6-link:hover{opacity:.9}
+.v6-muted{color:#64748b;font-size:11px}
+
+.v8-grid{grid-template-columns:repeat(4,1fr)}
+.v8-grid .analysis-card{min-height:125px}
+.kpi-note{font-size:10px;color:#64748b}
+@media(max-width:1000px){.v8-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.v8-grid{grid-template-columns:1fr}}
+@media print{#analitikV8{break-inside:avoid}}
+
+/* V11 - Audit kualitas data */
+.v11-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.v11-card{border:1px solid #e2e8f0;border-radius:10px;padding:15px;background:#fff}
+.v11-score{font-size:30px;font-weight:bold;margin:5px 0}
+.v11-good{color:#15803d}.v11-warn{color:#b45309}.v11-bad{color:#dc2626}
+.v11-meter{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:8px}.v11-meter span{display:block;height:100%;width:0;background:#166534;transition:width .3s}
+.v11-tag{display:inline-block;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;background:#f1f5f9;color:#334155}
+.v11-tag.missing{background:#fef3c7;color:#92400e}.v11-tag.invalid{background:#fee2e2;color:#991b1b}.v11-tag.duplicate{background:#ede9fe;color:#6d28d9}.v11-tag.future{background:#dbeafe;color:#1d4ed8}.v11-tag.coordinate{background:#ffedd5;color:#9a3412}
+
+/* V12 - Tindak lanjut lapangan */
+.v12-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.v12-card{border:1px solid #e2e8f0;border-radius:10px;padding:15px;background:#fff}
+.v12-number{font-size:28px;font-weight:bold;margin:5px 0}
+.v12-open{color:#b45309}.v12-done{color:#15803d}.v12-high{color:#dc2626}.v12-medium{color:#b45309}
+.v12-status{display:inline-block;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;background:#f1f5f9;color:#334155}
+.v12-status.open{background:#fef3c7;color:#92400e}.v12-status.done{background:#dcfce7;color:#166534}.v12-status.process{background:#dbeafe;color:#1d4ed8}
+@media(max-width:1000px){.v11-grid{grid-template-columns:repeat(3,1fr)}.v12-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.v11-grid{grid-template-columns:1fr 1fr}.v12-grid{grid-template-columns:1fr}}
+@media print{#auditV11Box,#tindakLanjutV12Box{break-inside:avoid}}
+
+/* V13 - Peta interaktif */
+#mapV13{height:500px;border:1px solid #cbd5e1;border-radius:10px;z-index:1;background:#eef2f5}
+.v13-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.v13-toolbar select,.v13-toolbar input{max-width:280px}
+.v13-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:#475569}
+.v13-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+.v13-good{background:#16a34a}.v13-medium{background:#f59e0b}.v13-bad{background:#dc2626}.v13-other{background:#2563eb}
+.v13-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.v13-summary .analysis-card{padding:12px}
+@media(max-width:650px){.v13-summary{grid-template-columns:repeat(2,1fr)}#mapV13{height:420px}}
+@media print{#petaV13Box{break-inside:avoid}}
+
+/* V14 - Peta interaktif lanjutan */
+.v14-map-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.v14-map-tools input{flex:1;min-width:220px;max-width:360px}
+.v14-map-tools button{white-space:nowrap}
+.v14-status{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;background:#f1f5f9;color:#334155;font-size:11px}
+.v14-selected{outline:3px solid rgba(37,99,235,.35);outline-offset:2px}
+.v14-help{font-size:11px;color:#64748b;margin-top:7px}
+.v14-coord{font-family:monospace;font-size:11px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:3px 6px}
+@media(max-width:650px){.v14-map-tools input{max-width:none;width:100%}}
+
+/* V17 - Finalisasi & integrasi sistem */
+.v17-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.v17-card{border:1px solid #e2e8f0;border-radius:10px;padding:16px;background:#fff}
+.v17-num{font-size:26px;font-weight:800;margin-top:6px}
+.v17-ok{color:#15803d}.v17-warn{color:#b45309}.v17-bad{color:#dc2626}.v17-blue{color:#2563eb}
+.v17-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.v17-status{padding:12px;border-radius:9px;background:#f8fafc;border:1px solid #e2e8f0;margin-top:14px;font-size:12px}
+.v17-pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#ecfdf5;color:#166534;font-weight:700;font-size:11px}
+@media(max-width:1000px){.v17-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.v17-grid{grid-template-columns:1fr}}
+@media print{#sistemV17Box{break-inside:avoid}}
+</style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+.v15-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.v15-card{border:1px solid #e2e8f0;border-radius:10px;padding:14px;background:#fff}.v15-num{font-size:27px;font-weight:700}.v15-ok{color:#15803d}.v15-warn{color:#b45309}.v15-bad{color:#dc2626}.v15-info{color:#2563eb}.v15-table{margin-top:12px}.v15-issue{background:#fee2e2;color:#991b1b;padding:3px 7px;border-radius:12px;font-size:11px;font-weight:700}.v15-valid{background:#dcfce7;color:#166534;padding:3px 7px;border-radius:12px;font-size:11px;font-weight:700}@media(max-width:1000px){.v15-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.v15-grid{grid-template-columns:1fr}}
+</style>
+
+<style>
+.v16-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:15px}.v16-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:15px;text-align:center}.v16-number{font-size:26px;font-weight:800;margin-top:7px}.v16-report{margin-top:15px;padding:18px;border:1px solid #e2e8f0;border-radius:12px;line-height:1.7;background:#fff}.v16-footer{margin-top:15px;text-align:right}.v16-report h3{margin:0 0 8px;color:#166534}@media(max-width:900px){.v16-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:600px){.v16-grid{grid-template-columns:repeat(2,1fr)}}
+@media print{body.v16-printing>*:not(#laporanV16Box){display:none!important}body.v16-printing #laporanV16Box{display:block!important;box-shadow:none;border:0;margin:0;padding:0}.no-print{display:none!important}.v16-grid{grid-template-columns:repeat(3,1fr)}table{font-size:9px}}
+</style>
+<style>.v16-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:15px}.v16-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:15px;text-align:center}.v16-number{font-size:26px;font-weight:800;margin-top:7px}.v16-report{margin-top:15px;padding:18px;border:1px solid #e2e8f0;border-radius:12px;line-height:1.7;background:#fff}.v16-footer{margin-top:15px;text-align:right}@media(max-width:900px){.v16-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:600px){.v16-grid{grid-template-columns:repeat(2,1fr)}}@media print{body.v16-printing>*:not(#laporanV16Box){display:none!important}body.v16-printing #laporanV16Box{display:block!important;border:0;box-shadow:none}.no-print{display:none!important}}</style>
+<style id="v18-final-style">
+.v18-box{margin:22px 0;border:1px solid #cfe3d6;border-radius:14px;background:#fff;box-shadow:0 5px 18px rgba(0,0,0,.06);padding:22px}
+.v18-head{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}.v18-head h2{margin:0;color:#145c32}.v18-badge{background:#e5f7ec;color:#126b36;padding:7px 12px;border-radius:999px;font-weight:800;font-size:12px}
+.v18-info{margin:14px 0;padding:12px 14px;border-left:4px solid #1b8a4b;background:#effaf3;border-radius:8px}
+.v18-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}.v18-card{border:1px solid #dfe7e2;border-radius:11px;padding:15px;background:#fbfdfc}.v18-label{font-size:12px;color:#65756b}.v18-num{font-size:25px;font-weight:800;margin-top:6px}
+.v18-check{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}.v18-item{padding:12px;border:1px solid #e2e8e4;border-radius:9px;background:#fafcfb}.v18-ok{font-weight:700;color:#137a3b}.v18-warn{font-weight:700;color:#a85b00}.v18-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.v18-actions button,.v18-actions label{cursor:pointer}.v18-note{font-size:12px;color:#68756e;margin-top:12px}
+@media(max-width:900px){.v18-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.v18-check{grid-template-columns:1fr}}@media(max-width:520px){.v18-grid{grid-template-columns:1fr}}
+@media print{.v18-no-print{display:none!important}.v18-box{box-shadow:none;border:1px solid #bbb}.v18-print-only{display:block!important}}
+.v18-print-only{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌱 SilviGrow</h1>
+  <p>Sistem Monitoring Silvikultur — V18 Final Release</p>
+</header>
+
+<div class="container">
+
+  <div class="dashboard">
+    <div class="card"><h3>Jumlah Monitoring</h3><div class="number" id="jumlahTanaman">0</div><p>Data pengamatan</p></div>
+    <div class="card"><h3>Tanaman Unik</h3><div class="number" id="tanamanUnik">0</div><p>Berdasarkan kode</p></div>
+    <div class="card"><h3>Rata-rata Tinggi</h3><div class="number" id="rataTinggi">0 cm</div><p>Pertumbuhan</p></div>
+    <div class="card"><h3>Rata-rata Diameter</h3><div class="number" id="rataDiameter">0 cm</div><p>Diameter batang</p></div>
+    <div class="card"><h3>Kondisi Baik</h3><div class="number" id="tanamanBaik">0</div><p>Monitoring sehat</p></div>
+    <div class="card"><h3>Total Pohon</h3><div class="number" id="totalPohon">0</div><p>Jumlah yang dicatat</p></div>
+    <div class="card"><h3>Persentase Baik</h3><div class="number" id="persenBaik">0%</div><p>Kondisi sehat</p></div>
+    <div class="card"><h3>Monitoring Terakhir</h3><div class="number small-number" id="monitoringTerakhir">-</div><p>Tanggal terbaru</p></div>
+    <div class="card"><h3>Tindak Lanjut Terbuka</h3><div class="number" id="v12Terbuka">0</div><p>Belum selesai</p></div>
+    <div class="card"><h3>Tindak Lanjut Selesai</h3><div class="number" id="v12Selesai">0</div><p>Sudah ditangani</p></div>
+  </div>
+
+  <div class="box" id="analitikV8">
+    <div class="report-title"><h2>📊 Dashboard Analitik V11</h2><span class="small">Indikator otomatis dari data monitoring tersimpan</span></div>
+    <div class="analysis-grid v8-grid">
+      <div class="analysis-card"><div class="analysis-label">Laju Tinggi Rata-rata</div><div class="analysis-number" id="v8LajuTinggi">0 cm/bln</div><div class="small">Rata-rata perubahan tinggi per tanaman</div></div>
+      <div class="analysis-card"><div class="analysis-label">Monitoring Jatuh Tempo</div><div class="analysis-number status-sedang" id="v8JatuhTempo">0</div><div class="small">Lebih dari 90 hari sejak monitoring</div></div>
+      <div class="analysis-card"><div class="analysis-label">Kelengkapan Data</div><div class="analysis-number status-baik" id="v8Kelengkapan">0%</div><div class="small">Kelengkapan 8 field utama</div></div>
+      <div class="analysis-card"><div class="analysis-label">Jumlah Lokasi</div><div class="analysis-number" id="v8Lokasi">0</div><div class="small">Lokasi/petak unik</div></div>
+    </div>
+    <div id="v8Insight" class="info" style="margin-top:15px;margin-bottom:0">Belum ada insight.</div>
+  </div>
+
+  <div class="box form-box">
+    <h2 id="formTitle">📝 Tambah Monitoring Tanaman</h2>
+    <div class="info">V12: seluruh fitur V10 dan V11 tetap dipertahankan, ditambah pencatatan tindak lanjut lapangan agar rekomendasi dapat ditelusuri sampai status penyelesaian.</div>
+    <div class="form-grid">
+      <div><label>Kode Tanaman</label><input id="kode" placeholder="Contoh: SG-001"></div>
+      <div><label>Jenis Tanaman</label><input id="jenis" placeholder="Contoh: Sengon"></div>
+      <div><label>Tinggi (cm)</label><input id="tinggi" type="number" min="0" step="0.1" placeholder="Contoh: 30"></div>
+      <div><label>Diameter (cm)</label><input id="diameter" type="number" min="0" step="0.1" placeholder="Contoh: 5"></div>
+      <div><label>Umur Tanaman</label><input id="umur" placeholder="Contoh: 6 bulan"></div>
+      <div><label>Tanggal Monitoring</label><input id="tanggal" type="date"></div>
+      <div><label>Kondisi Tanaman</label><select id="kondisi"><option>Baik</option><option>Sedang</option><option>Buruk</option></select></div>
+      <div><label>Lokasi</label><input id="lokasi" placeholder="Contoh: Kebun Percobaan"></div>
+      <div><label>Nomor Petak</label><input id="petak" placeholder="Contoh: P-01"></div>
+      <div><label>Desa</label><input id="desa" placeholder="Nama desa"></div>
+      <div><label>Kecamatan</label><input id="kecamatan" placeholder="Nama kecamatan"></div>
+      <div><label>Luas Lahan (ha)</label><input id="luas" type="number" min="0" step="0.01" placeholder="Contoh: 2.5"></div>
+      <div><label>Latitude</label><input id="latitude" type="number" step="any" placeholder="-2.123456"></div>
+      <div><label>Longitude</label><input id="longitude" type="number" step="any" placeholder="99.123456"></div>
+      <div><label>Jarak Tanam</label><input id="jarakTanam" placeholder="Contoh: 3 x 3 m"></div>
+      <div><label>Tahun Tanam</label><input id="tahunTanam" type="number" min="1900" max="2100" placeholder="Contoh: 2025"></div>
+      <div><label>Jumlah Pohon</label><input id="jumlahPohon" type="number" min="0" step="1" placeholder="Contoh: 100"></div>
+      <div style="grid-column:1/-1"><label>Catatan Lapangan</label><textarea id="catatan" rows="3" placeholder="Contoh: pertumbuhan baik, perlu pemangkasan, terdapat serangan hama, dan sebagainya."></textarea></div>
+      <div><label>Status Tindak Lanjut</label><select id="statusTindakLanjut"><option>Belum Ditindaklanjuti</option><option>Dalam Proses</option><option>Selesai</option></select></div>
+      <div><label>Tanggal Tindak Lanjut</label><input id="tanggalTindakLanjut" type="date"></div>
+      <div style="grid-column:1/-1"><label>Tindakan / Hasil Lapangan</label><textarea id="tindakLanjut" rows="3" placeholder="Contoh: pemangkasan dilakukan, tanaman diganti, pengendalian hama, atau hasil pemeriksaan lapangan."></textarea></div>
+    </div>
+    <div class="toolbar">
+      <button class="btn-simpan" id="btnSimpan" onclick="simpanData()">💾 Simpan Data</button>
+      <button class="btn-secondary" id="btnBatal" onclick="batalEdit()" style="display:none">✖ Batal Edit</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="report-title"><h2>🌳 Data Monitoring</h2><span class="badge">SilviGrow V11</span></div>
+    <div class="filter-grid">
+      <input class="search" id="pencarian" placeholder="🔎 Cari kode, jenis, lokasi, atau petak..." oninput="tampilkanData()">
+      <select id="filterKondisi" onchange="tampilkanData()"><option>Semua</option><option>Baik</option><option>Sedang</option><option>Buruk</option></select>
+      <select id="filterLokasi" onchange="tampilkanData()"><option value="">Semua Lokasi</option></select>
+    </div>
+    <div class="toolbar">
+      <button class="btn-info" onclick="exportCSV()">📊 Export CSV</button>
+      <button class="btn-secondary" onclick="backupJSON()">💾 Backup JSON</button>
+      <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 Import JSON</button>
+      <button class="btn-print" onclick="window.print()">🖨️ Cetak Laporan</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden onchange="importJSON(event)">
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>No</th><th>Kode</th><th>Jenis</th><th>Lokasi/Petak</th><th>Tinggi</th><th>Diameter</th><th>Umur</th><th>Tanggal</th><th>Kondisi</th><th>Jumlah Pohon</th><th class="aksi-col">Aksi</th></tr></thead>
+        <tbody id="tabelData"></tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <div class="box">
+    <div class="report-title"><h2>🩺 Analisis Kondisi Tanaman</h2><span class="small">Ringkasan berdasarkan seluruh data monitoring</span></div>
+    <div class="analysis-grid">
+      <div class="analysis-card"><div class="analysis-label">Baik</div><div class="analysis-number status-baik" id="analisisBaik">0</div><div class="progress"><span id="barBaik"></span></div></div>
+      <div class="analysis-card"><div class="analysis-label">Sedang</div><div class="analysis-number status-sedang" id="analisisSedang">0</div><div class="progress"><span id="barSedang"></span></div></div>
+      <div class="analysis-card"><div class="analysis-label">Buruk</div><div class="analysis-number status-buruk" id="analisisBuruk">0</div><div class="progress"><span id="barBuruk"></span></div></div>
+    </div>
+    <div id="catatanRingkas" class="info" style="margin-top:15px;margin-bottom:0">Belum ada catatan lapangan.</div>
+  </div>
+
+  <div class="box grafik-box">
+    <h2>📊 Grafik Pertumbuhan</h2>
+    <div class="grafik-grid">
+      <div class="grafik-card"><h3>🌱 Tinggi Tanaman</h3><div id="grafikTinggi" class="bar-chart"></div></div>
+      <div class="grafik-card"><h3>📏 Diameter Tanaman</h3><div id="grafikDiameter" class="bar-chart"></div></div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="report-title"><h2>📍 Rekap Lokasi / Petak</h2><button class="btn-print no-print" onclick="cetakLokasi()">🖨️ Cetak Rekap Lokasi</button></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Lokasi</th><th>Petak</th><th>Desa</th><th>Kecamatan</th><th>Luas (ha)</th><th>Jenis</th><th>Monitoring</th><th>Total Pohon</th><th>Koordinat</th></tr></thead>
+        <tbody id="tabelLokasi"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="box" id="lokasiV6Box">
+    <div class="report-title"><h2>🗺️ Dashboard Lokasi & Petak</h2><span class="small">Ringkasan luas, pohon, dan koordinat</span></div>
+    <div class="analysis-grid">
+      <div class="analysis-card"><div class="analysis-label">Total Luas Tercatat</div><div class="analysis-number" id="v6TotalLuas">0 ha</div><div class="small">Akumulasi luas pada data lokasi</div></div>
+      <div class="analysis-card"><div class="analysis-label">Kepadatan Rata-rata</div><div class="analysis-number" id="v6Kepadatan">0 pohon/ha</div><div class="small">Jumlah pohon ÷ luas lahan</div></div>
+      <div class="analysis-card"><div class="analysis-label">Lokasi Berkoordinat</div><div class="analysis-number" id="v6Koordinat">0</div><div class="small">Data dengan latitude & longitude</div></div>
+    </div>
+    <div class="table-wrap" style="margin-top:15px">
+      <table><thead><tr><th>Lokasi/Petak</th><th>Desa</th><th>Kecamatan</th><th>Luas</th><th>Pohon</th><th>Kepadatan</th><th>Koordinat</th></tr></thead><tbody id="tabelDashboardLokasi"></tbody></table>
+    </div>
+  </div>
+
+  <div class="box" id="analisisPertumbuhanV8">
+    <div class="report-title"><h2>🚦 Analisis Pertumbuhan & Peringatan</h2><span class="small">Otomatis berdasarkan monitoring pertama dan terbaru tiap kode tanaman</span></div>
+    <div class="analysis-grid">
+      <div class="analysis-card"><div class="analysis-label">Tanaman Bertumbuh</div><div class="analysis-number status-baik" id="v7Bertumbuh">0</div><div class="small">Tinggi meningkat</div></div>
+      <div class="analysis-card"><div class="analysis-label">Pertumbuhan Stagnan</div><div class="analysis-number status-sedang" id="v7Stagnan">0</div><div class="small">Tidak ada perubahan tinggi</div></div>
+      <div class="analysis-card"><div class="analysis-label">Perlu Perhatian</div><div class="analysis-number status-buruk" id="v7Perhatian">0</div><div class="small">Buruk / penurunan / lama tidak dimonitor</div></div>
+    </div>
+    <div id="v7Peringatan" class="info" style="margin-top:15px">Belum ada peringatan.</div>
+    <div class="table-wrap" style="margin-top:15px">
+      <table><thead><tr><th>Kode</th><th>Jenis</th><th>Monitoring</th><th>Perubahan Tinggi</th><th>Perubahan Diameter</th><th>Laju Tinggi/bln</th><th>Kondisi Terakhir</th><th>Status</th></tr></thead><tbody id="tabelPertumbuhanV8"></tbody></table>
+    </div>
+  </div>
+
+  <div class="box" id="jadwalV9Box">
+    <div class="report-title"><h2>📅 Jadwal Monitoring V9</h2><button class="btn-print no-print" onclick="cetakJadwalV9()">🖨️ Cetak Jadwal</button></div>
+    <div class="info">Jadwal berikut dihitung 90 hari setelah monitoring terakhir setiap kode tanaman. Gunakan sebagai pengingat monitoring lapangan.</div>
+    <div class="analysis-grid" style="margin-top:15px">
+      <div class="analysis-card"><div class="analysis-label">Sudah Jatuh Tempo</div><div class="analysis-number status-buruk" id="v9Tempo">0</div><div class="small">Perlu dimonitor segera</div></div>
+      <div class="analysis-card"><div class="analysis-label">≤ 30 Hari</div><div class="analysis-number status-sedang" id="v9Dekat">0</div><div class="small">Jadwal monitoring mendekat</div></div>
+      <div class="analysis-card"><div class="analysis-label">Masih Aktif</div><div class="analysis-number status-baik" id="v9Aktif">0</div><div class="small">Belum mendekati jatuh tempo</div></div>
+    </div>
+    <div class="table-wrap" style="margin-top:15px">
+      <table><thead><tr><th>Kode</th><th>Jenis</th><th>Monitoring Terakhir</th><th>Jadwal Berikutnya</th><th>Selisih</th><th>Kondisi</th><th>Status</th></tr></thead><tbody id="tabelJadwalV9"></tbody></table>
+    </div>
+  </div>
+
+
+  <div class="box" id="rekomendasiV10Box">
+    <div class="report-title"><h2>🧠 Rekomendasi & Prioritas Monitoring V10</h2><button class="btn-print no-print" onclick="cetakRekomendasiV10()">🖨️ Cetak Rekomendasi</button></div>
+    <div class="info">Prioritas dibuat otomatis dari kondisi terakhir, perubahan tinggi/diameter, dan lamanya tanaman tidak dimonitor. Ini adalah alat bantu keputusan lapangan, bukan pengganti penilaian langsung.</div>
+    <div class="analysis-grid" style="margin-top:15px">
+      <div class="analysis-card"><div class="analysis-label">Prioritas Tinggi</div><div class="analysis-number status-buruk" id="v10PrioritasTinggi">0</div><div class="small">Segera ditindaklanjuti</div></div>
+      <div class="analysis-card"><div class="analysis-label">Prioritas Sedang</div><div class="analysis-number status-sedang" id="v10PrioritasSedang">0</div><div class="small">Perlu perhatian berkala</div></div>
+      <div class="analysis-card"><div class="analysis-label">Prioritas Rendah</div><div class="analysis-number status-baik" id="v10PrioritasRendah">0</div><div class="small">Monitoring rutin</div></div>
+    </div>
+    <div id="v10Insight" class="info" style="margin-top:15px">Belum ada data yang cukup untuk membuat rekomendasi.</div>
+    <div class="table-wrap" style="margin-top:15px">
+      <table><thead><tr><th>Prioritas</th><th>Kode</th><th>Jenis</th><th>Lokasi/Petak</th><th>Kondisi</th><th>Perubahan Tinggi</th><th>Hari sejak monitoring</th><th>Rekomendasi</th></tr></thead><tbody id="tabelRekomendasiV10"></tbody></table>
+    </div>
+  </div>
+
+  <div class="box" id="laporanV10Box">
+    <div class="report-title"><h2>📄 Laporan Ringkas V10</h2><button class="btn-print no-print" onclick="cetakLaporanV10()">🖨️ Cetak Laporan V10</button></div>
+    <div id="laporanRingkasV10" class="info">Laporan akan diperbarui otomatis dari data monitoring.</div>
+  </div>
+
+
+  <div class="box" id="auditV11Box">
+    <div class="report-title"><h2>🧪 Audit Kualitas Data V11</h2><button class="btn-print no-print" onclick="cetakAuditV11()">🖨️ Cetak Audit</button></div>
+    <div class="info">Audit ini tidak mengubah data. Sistem memeriksa kelengkapan field utama, nilai numerik, koordinat, tanggal, dan duplikasi kode + tanggal. Gunakan hasilnya untuk membersihkan data sebelum analisis atau pelaporan.</div>
+    <div class="v11-grid">
+      <div class="v11-card"><div class="analysis-label">Skor Kualitas</div><div class="v11-score v11-good" id="v11Skor">100%</div><div class="v11-meter"><span id="v11Meter"></span></div><div class="small">100% = tidak ditemukan masalah</div></div>
+      <div class="v11-card"><div class="analysis-label">Data Lengkap</div><div class="v11-score status-baik" id="v11Lengkap">0</div><div class="small">Tidak memiliki field wajib yang kosong</div></div>
+      <div class="v11-card"><div class="analysis-label">Field Kosong</div><div class="v11-score v11-warn" id="v11Kosong">0</div><div class="small">Record dengan informasi wajib belum lengkap</div></div>
+      <div class="v11-card"><div class="analysis-label">Nilai Tidak Valid</div><div class="v11-score v11-bad" id="v11Invalid">0</div><div class="small">Angka, koordinat, atau tanggal bermasalah</div></div>
+      <div class="v11-card"><div class="analysis-label">Duplikat</div><div class="v11-score" id="v11Duplikat">0</div><div class="small">Kode + tanggal yang sama</div></div>
+    </div>
+    <div id="v11Insight" class="info" style="margin-top:15px">Belum ada data untuk diaudit.</div>
+    <div class="toolbar no-print" style="margin-top:10px">
+      <select id="v11FilterMasalah" onchange="auditV11()">
+        <option value="Semua">Semua Masalah</option><option value="Kosong">Field Kosong</option><option value="Tidak Valid">Nilai Tidak Valid</option><option value="Duplikat">Duplikat</option><option value="Tanggal Masa Depan">Tanggal Masa Depan</option><option value="Koordinat Tidak Lengkap">Koordinat Tidak Lengkap</option>
+      </select>
+      <button class="btn-info" onclick="exportAuditV11()">📊 Export Audit CSV</button>
+    </div>
+    <div class="table-wrap" style="margin-top:12px">
+      <table><thead><tr><th>No</th><th>Kode</th><th>Jenis</th><th>Tanggal</th><th>Masalah</th><th>Detail</th><th>Saran Perbaikan</th></tr></thead><tbody id="tabelAuditV11"></tbody></table>
+    </div>
+  </div>
+
+  <div class="box" id="tindakLanjutV12Box">
+    <div class="report-title"><h2>🛠️ Tindak Lanjut Lapangan V12</h2><button class="btn-print no-print" onclick="cetakTindakLanjutV12()">🖨️ Cetak Tindak Lanjut</button></div>
+    <div class="info">Daftar ini menghubungkan kondisi dan prioritas V10 dengan tindakan lapangan. Status dapat diperbarui melalui form monitoring.</div>
+    <div class="v12-grid">
+      <div class="v12-card"><div class="analysis-label">Belum Ditindaklanjuti</div><div class="v12-number v12-open" id="v12Belum">0</div><div class="small">Perlu dibuat tindakan</div></div>
+      <div class="v12-card"><div class="analysis-label">Dalam Proses</div><div class="v12-number v12-medium" id="v12Proses">0</div><div class="small">Sedang dikerjakan</div></div>
+      <div class="v12-card"><div class="analysis-label">Selesai</div><div class="v12-number v12-done" id="v12SelesaiBox">0</div><div class="small">Tindakan telah dicatat</div></div>
+      <div class="v12-card"><div class="analysis-label">Prioritas Tinggi Terbuka</div><div class="v12-number v12-high" id="v12PrioritasTerbuka">0</div><div class="small">Fokus lapangan utama</div></div>
+    </div>
+    <div class="toolbar no-print" style="margin-top:12px">
+      <select id="v12FilterStatus" onchange="tampilkanTindakLanjutV12()"><option>Semua Status</option><option>Belum Ditindaklanjuti</option><option>Dalam Proses</option><option>Selesai</option></select>
+      <select id="v12FilterPrioritas" onchange="tampilkanTindakLanjutV12()"><option>Semua Prioritas</option><option>Tinggi</option><option>Sedang</option><option>Rendah</option></select>
+      <button class="btn-info" onclick="exportTindakLanjutV12()">📊 Export Tindak Lanjut CSV</button>
+    </div>
+    <div class="table-wrap" style="margin-top:12px">
+      <table><thead><tr><th>No</th><th>Prioritas</th><th>Kode</th><th>Jenis</th><th>Lokasi/Petak</th><th>Kondisi</th><th>Status</th><th>Tanggal Tindakan</th><th>Tindakan / Hasil</th><th class="aksi-col">Aksi</th></tr></thead><tbody id="tabelTindakLanjutV12"></tbody>
+    </table></div>
+  </div>
+
+  <div class="box" id="petaV13Box">
+    <div class="report-title"><h2>🗺️ Peta Interaktif Lokasi Tanaman V14</h2><span class="small">Peta V13 dipertahankan dan ditingkatkan dengan pencarian, layer peta, lokasi perangkat, serta input koordinat melalui klik.</span></div>
+    <div class="info">V14: gunakan filter kondisi/lokasi, cari kode atau jenis tanaman, ganti jenis peta, klik marker untuk detail, atau klik area peta untuk mengisi koordinat pada formulir monitoring.</div>
+    <div class="v13-summary">
+      <div class="analysis-card"><div class="analysis-label">Lokasi di Peta</div><div class="analysis-number" id="v13TotalMap">0</div><div class="small">Petak unik berkoordinat</div></div>
+      <div class="analysis-card"><div class="analysis-label">Kondisi Baik</div><div class="analysis-number v11-good" id="v13BaikMap">0</div><div class="small">Marker hijau</div></div>
+      <div class="analysis-card"><div class="analysis-label">Kondisi Sedang</div><div class="analysis-number v11-warn" id="v13SedangMap">0</div><div class="small">Marker kuning</div></div>
+      <div class="analysis-card"><div class="analysis-label">Kondisi Buruk</div><div class="analysis-number v11-bad" id="v13BurukMap">0</div><div class="small">Marker merah</div></div>
+    </div>
+    <div class="v13-toolbar no-print">
+      <select id="v13FilterKondisi" onchange="renderPetaV13()"><option value="Semua">Semua Kondisi</option><option value="Baik">Baik</option><option value="Sedang">Sedang</option><option value="Buruk">Buruk</option></select>
+      <select id="v13FilterLokasi" onchange="renderPetaV13()"><option value="">Semua Lokasi</option></select>
+      <button class="btn-info" onclick="fitPetaV13()">🎯 Tampilkan Semua</button>
+      <button class="btn-secondary" onclick="lokasiTerakhirV13()">📍 Lokasi Monitoring Terbaru</button>
+      <button class="btn-print" onclick="window.print()">🖨️ Cetak Peta</button>
+    </div>
+    <div class="v14-map-tools no-print">
+      <input id="v14CariPeta" placeholder="🔎 Cari kode, jenis, lokasi, petak, desa..." oninput="renderPetaV14()">
+      <button class="btn-info" onclick="lokasiPerangkatV14()">📍 Lokasi Saya</button>
+      <button class="btn-secondary" onclick="fokusIndonesiaV14()">🇮🇩 Fokus Indonesia</button>
+      <button class="btn-secondary" onclick="resetPetaV14()">↺ Reset Tampilan</button>
+    </div>
+    <div class="v14-status no-print" id="v14MapStatus">Memuat peta...</div>
+    <div id="petaInfoV13" class="info" style="margin-top:8px">Memuat peta...</div>
+    <div id="mapV13"></div>
+    <div class="v13-legend"><span><i class="v13-dot v13-good"></i>Baik</span><span><i class="v13-dot v13-medium"></i>Sedang</span><span><i class="v13-dot v13-bad"></i>Buruk</span><span><i class="v13-dot v13-other"></i>Kondisi lainnya</span></div>
+    <div class="v14-help no-print">💡 <b>Tip:</b> klik marker untuk detail. Klik titik kosong pada peta untuk memasukkan latitude & longitude ke formulir. Gunakan tombol <b>Lokasi Saya</b> untuk memusatkan peta berdasarkan izin lokasi browser.</div>
+  </div>
+
+  <div class="box grafik-box">
+    <div class="report-title"><h2>📈 Riwayat Monitoring Tanaman</h2><span class="small">Pilih satu kode untuk melihat perkembangan waktu dan perubahan biometrik</span></div>
+    <div class="filter-grid">
+      <input id="cariRiwayat" placeholder="🔎 Cari kode atau jenis..." oninput="renderRiwayatList()">
+      <select id="pilihKode" onchange="tampilkanRiwayat(this.value)"><option value="">Pilih tanaman</option></select>
+    </div>
+    <div id="riwayatContent" class="empty">Pilih kode tanaman untuk melihat riwayat.</div>
+  </div>
+
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+let dataTanaman=[];
+let indexEdit=-1;
+
+function loadData(){
+  try{dataTanaman=JSON.parse(localStorage.getItem("dataTanaman"))||[]}catch(e){dataTanaman=[]}
+  dataTanaman=dataTanaman.map((d,i)=>({
+    id:d.id||("m_"+Date.now()+"_"+i),
+    kode:String(d.kode||("SG-"+String(i+1).padStart(3,"0"))).toUpperCase(),
+    jenis:String(d.jenis||""),
+    tinggi:Number(d.tinggi)||0,
+    diameter:Number(d.diameter)||0,
+    umur:String(d.umur||""),
+    kondisi:["Baik","Sedang","Buruk"].includes(d.kondisi)?d.kondisi:"Baik",
+    tanggal:d.tanggal||"",
+    lokasi:String(d.lokasi||""),
+    petak:String(d.petak||""),
+    desa:String(d.desa||""),
+    kecamatan:String(d.kecamatan||""),
+    luas:Number(d.luas)||0,
+    latitude:d.latitude!==undefined?String(d.latitude):"",
+    longitude:d.longitude!==undefined?String(d.longitude):"",
+    jarakTanam:String(d.jarakTanam||""),
+    tahunTanam:d.tahunTanam?Number(d.tahunTanam):"",
+    jumlahPohon:d.jumlahPohon!==undefined?Number(d.jumlahPohon)||0:1,
+    catatan:String(d.catatan||""),
+     statusTindakLanjut:["Belum Ditindaklanjuti","Dalam Proses","Selesai"].includes(d.statusTindakLanjut)?d.statusTindakLanjut:"Belum Ditindaklanjuti",
+     tanggalTindakLanjut:d.tanggalTindakLanjut||"",
+     tindakLanjut:String(d.tindakLanjut||"")
+  }));
+  save();
+}
+function save(){localStorage.setItem("dataTanaman",JSON.stringify(dataTanaman))}
+function val(id){return document.getElementById(id).value.trim()}
+function setv(id,v){document.getElementById(id).value=v??""}
+function simpanData(){
+  const d={
+    id:indexEdit===-1?("m_"+Date.now()+"_"+Math.random().toString(36).slice(2,8)):dataTanaman[indexEdit].id,
+    kode:val("kode").toUpperCase(),jenis:val("jenis"),tinggi:Number(val("tinggi")),diameter:Number(val("diameter")),
+    umur:val("umur"),tanggal:val("tanggal"),kondisi:document.getElementById("kondisi").value,
+    lokasi:val("lokasi"),petak:val("petak"),desa:val("desa"),kecamatan:val("kecamatan"),luas:Number(val("luas"))||0,
+    latitude:val("latitude"),longitude:val("longitude"),jarakTanam:val("jarakTanam"),
+    tahunTanam:Number(val("tahunTanam"))||"",jumlahPohon:Number(val("jumlahPohon"))||0,catatan:val("catatan"),
+     statusTindakLanjut:document.getElementById("statusTindakLanjut").value,tanggalTindakLanjut:val("tanggalTindakLanjut"),tindakLanjut:val("tindakLanjut")
+  };
+  if(!d.kode||!d.jenis||!d.umur||!d.tanggal||isNaN(d.tinggi)||isNaN(d.diameter)){alert("Lengkapi kode, jenis, tinggi, diameter, umur, dan tanggal monitoring.");return}
+  if(d.tinggi<0||d.diameter<0||d.luas<0||d.jumlahPohon<0){alert("Nilai angka tidak boleh negatif.");return}
+  if(d.tinggi>10000||d.diameter>500){alert("Nilai tinggi/diameter terlihat tidak wajar. Periksa kembali satuannya.");return}
+  if(d.luas>100000){alert("Luas lahan terlalu besar. Periksa kembali data.");return}
+  if(d.tahunTanam && (d.tahunTanam<1900 || d.tahunTanam>new Date().getFullYear()+1)){alert("Tahun tanam tidak valid.");return}
+  if((d.latitude!=='' || d.longitude!=='') && (d.latitude==='' || d.longitude==='')){alert("Latitude dan longitude harus diisi berpasangan.");return}
+  if(d.latitude!=='' && (Number(d.latitude)<-90 || Number(d.latitude)>90)){alert("Latitude harus berada antara -90 dan 90.");return}
+  if(d.longitude!=='' && (Number(d.longitude)<-180 || Number(d.longitude)>180)){alert("Longitude harus berada antara -180 dan 180.");return}
+  if(new Date(d.tanggal)>new Date()){alert("Tanggal monitoring tidak boleh berada di masa depan.");return}
+  const dup=dataTanaman.some((x,i)=>x.kode===d.kode&&x.tanggal===d.tanggal&&i!==indexEdit);
+  if(dup){alert("Kode tanaman tersebut sudah memiliki monitoring pada tanggal yang sama.");return}
+  if(indexEdit===-1){dataTanaman.push(d);showToast("Monitoring berhasil ditambahkan")}
+  else{dataTanaman[indexEdit]=d;indexEdit=-1;showToast("Monitoring berhasil diperbarui")}
+  save();resetForm();renderAll();
+}
+function editData(i){
+  const d=dataTanaman[i];
+  ["kode","jenis","tinggi","diameter","umur","tanggal","lokasi","petak","desa","kecamatan","luas","latitude","longitude","jarakTanam","tahunTanam","jumlahPohon","catatan","statusTindakLanjut","tanggalTindakLanjut","tindakLanjut"].forEach(k=>setv(k,d[k]));
+  setv("kondisi",d.kondisi);indexEdit=i;
+  document.getElementById("formTitle").innerText="✏️ Edit Monitoring Tanaman";
+  document.getElementById("btnSimpan").innerText="💾 Update Data";
+  document.getElementById("btnBatal").style.display="inline-block";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function batalEdit(){indexEdit=-1;resetForm();showToast("Mode edit dibatalkan")}
+function resetForm(){
+  ["kode","jenis","tinggi","diameter","umur","lokasi","petak","desa","kecamatan","luas","latitude","longitude","jarakTanam","tahunTanam","jumlahPohon","catatan"].forEach(id=>setv(id,""));
+  setv("tanggal",new Date().toISOString().slice(0,10));setv("kondisi","Baik");setv("statusTindakLanjut","Belum Ditindaklanjuti");setv("tanggalTindakLanjut","");setv("tindakLanjut","");
+  document.getElementById("formTitle").innerText="📝 Tambah Monitoring Tanaman";
+  document.getElementById("btnSimpan").innerText="💾 Simpan Data";document.getElementById("btnBatal").style.display="none";indexEdit=-1;
+}
+let undoV15=null;
+function hapusData(i){
+  if(confirm("Yakin ingin menghapus monitoring "+dataTanaman[i].kode+"?")){undoV15={item:dataTanaman[i],index:i};dataTanaman.splice(i,1);save();renderAll();showToast("Data dihapus. Gunakan tombol ↩️ untuk membatalkan.")}
+}
+function batalkanUndoV15(){
+  if(!undoV15){showToast("Tidak ada penghapusan yang bisa dibatalkan.");return}
+  dataTanaman.splice(Math.min(undoV15.index,dataTanaman.length),0,undoV15.item);undoV15=null;save();renderAll();showToast("Penghapusan terakhir berhasil dibatalkan.");
+}
+function validasiRecordV15(d, index){
+ let issues=[];
+ if(!d.kode||!d.jenis||!d.umur||!d.tanggal||!Number.isFinite(Number(d.tinggi))||!Number.isFinite(Number(d.diameter))) issues.push('Field wajib kosong');
+ if(Number(d.tinggi)<0||Number(d.diameter)<0||Number(d.luas||0)<0||Number(d.jumlahPohon||0)<0) issues.push('Nilai negatif');
+ if(Number(d.tinggi)>10000||Number(d.diameter)>500) issues.push('Nilai biologis tidak wajar');
+ if((d.latitude!==''||d.longitude!=='')&&(d.latitude===''||d.longitude==='')) issues.push('Koordinat tidak lengkap');
+ if(d.latitude!==''&&(Number(d.latitude)<-90||Number(d.latitude)>90)) issues.push('Latitude tidak valid');
+ if(d.longitude!==''&&(Number(d.longitude)<-180||Number(d.longitude)>180)) issues.push('Longitude tidak valid');
+ if(d.tanggal&&new Date(d.tanggal)>new Date()) issues.push('Tanggal masa depan');
+ const dup=dataTanaman.some((x,j)=>j!==index&&x.kode===d.kode&&x.tanggal===d.tanggal); if(dup) issues.push('Duplikat kode + tanggal');
+ return issues;
+}
+function jalankanValidasiV15(){
+ const tbody=document.getElementById('tabelValidasiV15');let valid=0,invalid=0,dup=0,future=0;
+ if(!dataTanaman.length){tbody.innerHTML='<tr><td colspan="5" class="empty">Belum ada data untuk divalidasi.</td></tr>';}
+ else tbody.innerHTML=dataTanaman.map((d,i)=>{const issues=validasiRecordV15(d,i);if(!issues.length)valid++;else invalid++;if(issues.includes('Duplikat kode + tanggal'))dup++;if(issues.includes('Tanggal masa depan'))future++;return `<tr><td>${i+1}</td><td><b>${esc(d.kode||'-')}</b></td><td>${esc(d.tanggal||'-')}</td><td>${issues.length?'<span class="v15-issue">Perlu diperiksa</span>':'<span class="v15-valid">Valid</span>'}</td><td>${issues.length?issues.map(esc).join(', '):'-'}</td></tr>`}).join('');
+ document.getElementById('v15Valid').innerText=valid;document.getElementById('v15Invalid').innerText=invalid;document.getElementById('v15Duplicate').innerText=dup;document.getElementById('v15Future').innerText=future;
+}
+
+function tampilkanData(){
+  const q=val("pencarian").toLowerCase(),f=document.getElementById("filterKondisi").value,fl=document.getElementById("filterLokasi").value,t=document.getElementById("tabelData");
+  const arr=dataTanaman.filter(d=>{
+    const text=[d.kode,d.jenis,d.lokasi,d.petak,d.desa,d.kecamatan].join(" ").toLowerCase();
+    return text.includes(q)&&(f==="Semua"||d.kondisi===f)&&(!fl||d.lokasi===fl)
+  });
+  if(!arr.length){t.innerHTML='<tr><td colspan="11" class="empty">Belum ada data yang sesuai.</td></tr>';return}
+  t.innerHTML=arr.map((d,n)=>{const i=dataTanaman.indexOf(d);return `<tr>
+    <td>${n+1}</td><td><b>${esc(d.kode)}</b></td><td>${esc(d.jenis)}</td>
+    <td>${esc(d.lokasi||"-")} / ${esc(d.petak||"-")}</td><td>${d.tinggi} cm</td><td>${d.diameter} cm</td>
+    <td>${esc(d.umur)}</td><td>${d.tanggal?fmt(d.tanggal):"-"}</td><td class="status-${d.kondisi.toLowerCase()}">${esc(d.kondisi)}</td>
+    <td>${d.jumlahPohon}</td><td class="aksi-col"><button class="btn-edit" onclick="editData(${i})">Edit</button> <button class="btn-hapus" onclick="hapusData(${i})">Hapus</button></td>
+  </tr>`}).join("");
+}
+function hitungDashboard(){
+  const n=dataTanaman.length, uniq=new Set(dataTanaman.map(d=>d.kode)).size;
+  document.getElementById("jumlahTanaman").innerText=n;document.getElementById("tanamanUnik").innerText=uniq;
+  document.getElementById("rataTinggi").innerText=n?(dataTanaman.reduce((s,d)=>s+d.tinggi,0)/n).toFixed(1)+" cm":"0 cm";
+  document.getElementById("rataDiameter").innerText=n?(dataTanaman.reduce((s,d)=>s+d.diameter,0)/n).toFixed(1)+" cm":"0 cm";
+  document.getElementById("tanamanBaik").innerText=dataTanaman.filter(d=>d.kondisi==="Baik").length;
+  document.getElementById("totalPohon").innerText=dataTanaman.reduce((s,d)=>s+(d.jumlahPohon||0),0);
+}
+function grafik(id,key){
+  const box=document.getElementById(id);box.innerHTML="";
+  if(!dataTanaman.length){box.innerHTML='<div class="empty">Belum ada data</div>';return}
+  const max=Math.max(...dataTanaman.map(d=>Number(d[key])||0),1);
+  dataTanaman.forEach(d=>{const h=Math.max(3,(Number(d[key])||0)/max*100);box.innerHTML+=`<div class="bar-item"><div class="bar-value">${d[key]} cm</div><div class="bar" style="height:${h}%"></div><div class="bar-label" title="${esc(d.kode)}">${esc(d.kode)}</div></div>`})
+}
+function tampilkanGrafik(){grafik("grafikTinggi","tinggi");grafik("grafikDiameter","diameter")}
+function renderLokasi(){
+  const m={};
+  dataTanaman.forEach(d=>{
+    const key=[d.lokasi,d.petak].join("|");
+    if(!m[key])m[key]={lokasi:d.lokasi||"-",petak:d.petak||"-",desa:d.desa||"-",kecamatan:d.kecamatan||"-",luas:d.luas||0,jenis:new Set(),n:0,pohon:0,lat:d.latitude,lon:d.longitude};
+    m[key].jenis.add(d.jenis);m[key].n++;m[key].pohon+=d.jumlahPohon||0;
+  });
+  const rows=Object.values(m);const t=document.getElementById("tabelLokasi");
+  t.innerHTML=rows.length?rows.map(x=>`<tr><td>${esc(x.lokasi)}</td><td>${esc(x.petak)}</td><td>${esc(x.desa)}</td><td>${esc(x.kecamatan)}</td><td>${x.luas}</td><td>${esc([...x.jenis].join(", "))}</td><td>${x.n}</td><td>${x.pohon}</td><td>${x.lat||"-"}, ${x.lon||"-"}</td></tr>`).join(""):'<tr><td colspan="9" class="empty">Belum ada data lokasi.</td></tr>';
+}
+function renderRiwayatList(){
+  const sel=document.getElementById("pilihKode"),q=val("cariRiwayat").toLowerCase(),old=sel.value,m={};
+  dataTanaman.forEach(d=>{if(!m[d.kode])m[d.kode]={kode:d.kode,jenis:d.jenis,n:0};m[d.kode].n++});
+  const arr=Object.values(m).filter(x=>(x.kode+" "+x.jenis).toLowerCase().includes(q)).sort((a,b)=>a.kode.localeCompare(b.kode));
+  sel.innerHTML='<option value="">Pilih tanaman</option>'+arr.map(x=>`<option value="${esc(x.kode)}">${esc(x.kode)} — ${esc(x.jenis)} (${x.n} monitoring)</option>`).join("");
+  if(arr.some(x=>x.kode===old)){sel.value=old;tampilkanRiwayat(old)}
+}
+function tampilkanRiwayat(kode){
+  const box=document.getElementById("riwayatContent");if(!kode){box.innerHTML='<div class="empty">Pilih kode tanaman untuk melihat riwayat.</div>';return}
+  const r=dataTanaman.filter(d=>d.kode===kode).sort((a,b)=>(a.tanggal||"").localeCompare(b.tanggal||""));if(!r.length)return;
+  const first=r[0],last=r[r.length-1],dh=last.tinggi-first.tinggi,dd=last.diameter-first.diameter;
+  const maxH=Math.max(...r.map(x=>x.tinggi),1),maxD=Math.max(...r.map(x=>x.diameter),1);
+  const hb=r.map(x=>`<div class="bar-item"><div class="bar-value">${x.tinggi} cm</div><div class="bar" style="height:${Math.max(3,x.tinggi/maxH*100)}%"></div><div class="bar-label">${fmt(x.tanggal)}</div></div>`).join("");
+  const db=r.map(x=>`<div class="bar-item"><div class="bar-value">${x.diameter} cm</div><div class="bar" style="height:${Math.max(3,x.diameter/maxD*100)}%"></div><div class="bar-label">${fmt(x.tanggal)}</div></div>`).join("");
+  box.innerHTML=`<h3 style="color:#166534">${esc(kode)} — ${esc(last.jenis)}</h3>
+  <p class="small">Monitoring: <b>${r.length}</b> · Perubahan tinggi: <b>${dh>=0?"+":""}${dh.toFixed(1)} cm</b> · Perubahan diameter: <b>${dd>=0?"+":""}${dd.toFixed(1)} cm</b></p>
+  <div class="grafik-grid"><div class="grafik-card"><h3>🌱 Tinggi dari waktu ke waktu</h3><div class="bar-chart">${hb}</div></div>
+  <div class="grafik-card"><h3>📏 Diameter dari waktu ke waktu</h3><div class="bar-chart">${db}</div></div></div>
+  <div class="table-wrap" style="margin-top:15px"><table><thead><tr><th>Tanggal</th><th>Tinggi</th><th>Diameter</th><th>Umur</th><th>Lokasi</th><th>Kondisi</th></tr></thead><tbody>
+  ${r.map(x=>`<tr><td>${fmt(x.tanggal)}</td><td>${x.tinggi} cm</td><td>${x.diameter} cm</td><td>${esc(x.umur)}</td><td>${esc(x.lokasi||"-")} / ${esc(x.petak||"-")}</td><td class="status-${x.kondisi.toLowerCase()}">${esc(x.kondisi)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+function exportCSV(){
+  if(!dataTanaman.length){alert("Belum ada data.");return}
+  const head=["No","Kode","Jenis","Tinggi (cm)","Diameter (cm)","Umur","Tanggal","Kondisi","Lokasi","Petak","Desa","Kecamatan","Luas (ha)","Latitude","Longitude","Jarak Tanam","Tahun Tanam","Jumlah Pohon","Catatan"];
+  const rows=[head,...dataTanaman.map((d,i)=>[i+1,d.kode,d.jenis,d.tinggi,d.diameter,d.umur,d.tanggal,d.kondisi,d.lokasi,d.petak,d.desa,d.kecamatan,d.luas,d.latitude,d.longitude,d.jarakTanam,d.tahunTanam,d.jumlahPohon,d.catatan])];
+  const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  download("silvigrow_v7_data.csv",csv,"text/csv;charset=utf-8");showToast("CSV berhasil diekspor")
+}
+function backupJSON(){download("silvigrow_v11_backup.json",JSON.stringify(dataTanaman,null,2),"application/json");showToast("Backup JSON berhasil dibuat")}
+function importJSON(e){
+  const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{try{const a=JSON.parse(rd.result);if(!Array.isArray(a))throw 0;if(!confirm("Import akan mengganti data saat ini. Lanjutkan?"))return;
+    dataTanaman=a.map((d,i)=>({...d,id:d.id||("m_"+Date.now()+"_"+i),kode:String(d.kode||("SG-"+String(i+1).padStart(3,"0"))).toUpperCase(),jenis:String(d.jenis||""),tinggi:Number(d.tinggi)||0,diameter:Number(d.diameter)||0,luas:Number(d.luas)||0,jumlahPohon:d.jumlahPohon===undefined?1:Number(d.jumlahPohon)||0,catatan:String(d.catatan||""),kondisi:["Baik","Sedang","Buruk"].includes(d.kondisi)?d.kondisi:"Baik",tanggal:d.tanggal||"",lokasi:String(d.lokasi||""),petak:String(d.petak||""),desa:String(d.desa||""),kecamatan:String(d.kecamatan||""),umur:String(d.umur||""),latitude:d.latitude!==undefined?String(d.latitude):"",longitude:d.longitude!==undefined?String(d.longitude):"",jarakTanam:String(d.jarakTanam||""),tahunTanam:d.tahunTanam?Number(d.tahunTanam):"",statusTindakLanjut:["Belum Ditindaklanjuti","Dalam Proses","Selesai"].includes(d.statusTindakLanjut)?d.statusTindakLanjut:"Belum Ditindaklanjuti",tanggalTindakLanjut:d.tanggalTindakLanjut||"",tindakLanjut:String(d.tindakLanjut||"")}));
+    save();renderAll();showToast("Data berhasil diimpor")
+  }catch(x){alert("File JSON tidak valid.")}e.target.value=""};rd.readAsText(f)
+}
+function cetakLokasi(){window.print()}
+function download(name,text,type){const b=new Blob([text],{type}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function fmt(s){const p=String(s||"").split("-");return p.length===3?`${p[2]}-${p[1]}-${p[0]}`:s||"-"}
+function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]))}
+function showToast(msg){const t=document.getElementById("toast");t.innerText=msg;t.style.display="block";clearTimeout(window._toast);window._toast=setTimeout(()=>t.style.display="none",2500)}
+
+function renderFilterLokasi(){
+  const sel=document.getElementById("filterLokasi"),old=sel.value;
+  const lokasi=[...new Set(dataTanaman.map(d=>d.lokasi).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  sel.innerHTML='<option value="">Semua Lokasi</option>'+lokasi.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+  if(lokasi.includes(old))sel.value=old;
+}
+function analisisKondisi(){
+  const n=dataTanaman.length||1;
+  const b=dataTanaman.filter(d=>d.kondisi==="Baik").length;
+  const s=dataTanaman.filter(d=>d.kondisi==="Sedang").length;
+  const r=dataTanaman.filter(d=>d.kondisi==="Buruk").length;
+  document.getElementById("analisisBaik").innerText=b;
+  document.getElementById("analisisSedang").innerText=s;
+  document.getElementById("analisisBuruk").innerText=r;
+  document.getElementById("barBaik").style.width=(b/n*100)+"%";
+  document.getElementById("barSedang").style.width=(s/n*100)+"%";
+  document.getElementById("barBuruk").style.width=(r/n*100)+"%";
+  document.getElementById("persenBaik").innerText=(b/(dataTanaman.length||1)*100).toFixed(0)+"%";
+  const catatan=dataTanaman.filter(d=>d.catatan).slice(-5).reverse();
+  document.getElementById("catatanRingkas").innerHTML=catatan.length
+    ? "<b>Catatan terbaru:</b><br>"+catatan.map(d=>`• ${esc(d.kode)} — ${esc(d.catatan)}`).join("<br>")
+    : "Belum ada catatan lapangan.";
+  const dates=dataTanaman.map(d=>d.tanggal).filter(Boolean).sort();
+  document.getElementById("monitoringTerakhir").innerText=dates.length?fmt(dates[dates.length-1]):"-";
+}
+
+function renderDashboardLokasiV6(){
+  const rows={}; let luas=0,pohon=0,koor=0;
+  dataTanaman.forEach(d=>{
+    const key=(d.lokasi||"Tanpa lokasi")+"||"+(d.petak||"-");
+    if(!rows[key]) rows[key]={lokasi:d.lokasi||"-",petak:d.petak||"-",desa:d.desa||"-",kecamatan:d.kecamatan||"-",luas:0,pohon:0,lat:d.latitude,lon:d.longitude};
+    const r=rows[key]; r.luas=Math.max(r.luas,Number(d.luas)||0); r.pohon=Math.max(r.pohon,Number(d.jumlahPohon)||0);
+    if(!r.lat && d.latitude) r.lat=d.latitude; if(!r.lon && d.longitude) r.lon=d.longitude;
+  });
+  Object.values(rows).forEach(r=>{luas+=r.luas;pohon+=r.pohon;if(r.lat&&r.lon)koor++});
+  document.getElementById('v6TotalLuas').textContent=luas.toFixed(2)+' ha';
+  document.getElementById('v6Kepadatan').textContent=(luas?pohon/luas:0).toFixed(1)+' pohon/ha';
+  document.getElementById('v6Koordinat').textContent=koor;
+  const tb=document.getElementById('tabelDashboardLokasi');
+  const vals=Object.values(rows);
+  tb.innerHTML=vals.length?vals.map(r=>{const dens=r.luas?(r.pohon/r.luas).toFixed(1):'-'; const map=r.lat&&r.lon?`<a class="v6-link" target="_blank" href="https://www.google.com/maps?q=${encodeURIComponent(r.lat+','+r.lon)}">Buka Peta</a>`:'<span class="v6-muted">Belum ada koordinat</span>';return `<tr><td><b>${esc(r.lokasi)}</b><br><span class="v6-muted">${esc(r.petak)}</span></td><td>${esc(r.desa)}</td><td>${esc(r.kecamatan)}</td><td>${r.luas.toFixed(2)} ha</td><td>${r.pohon}</td><td>${dens}</td><td>${map}</td></tr>`}).join(''):'<tr><td colspan="7" class="empty">Belum ada data lokasi.</td></tr>';
+}
+function ringkasTanamanV7(){
+  const m={};
+  dataTanaman.forEach(d=>{if(!m[d.kode])m[d.kode]=[];m[d.kode].push(d)});
+  return Object.keys(m).map(k=>{
+    const r=m[k].slice().sort((a,b)=>(a.tanggal||"").localeCompare(b.tanggal||""));
+    const first=r[0],last=r[r.length-1];
+    const dh=Number(last.tinggi||0)-Number(first.tinggi||0), dd=Number(last.diameter||0)-Number(first.diameter||0);
+    const days=(first.tanggal&&last.tanggal)?Math.max(1,(new Date(last.tanggal)-new Date(first.tanggal))/86400000):1;
+    const months=days/30.4375;
+    const rate=months>0.1?dh/months:0;
+    const stale=last.tanggal?((new Date()-new Date(last.tanggal))/86400000>90):true;
+    const perhatian=last.kondisi==='Buruk'||dh<0||dd<0||stale;
+    const status=perhatian?'Perlu perhatian':(dh>0?'Bertumbuh':'Stagnan');
+    return {kode:k,jenis:last.jenis||first.jenis,monitoring:r.length,dh,dd,rate,last,stale,status,first};
+  }).sort((a,b)=>a.kode.localeCompare(b.kode));
+}
+function analisisPertumbuhanV7(){
+  const rows=ringkasTanamanV7();
+  const stag=rows.filter(x=>x.dh===0&&!['Buruk'].includes(x.last.kondisi)).length;
+  const perhatian=rows.filter(x=>x.status==='Perlu perhatian').length;
+  document.getElementById('v7Bertumbuh').textContent=rows.filter(x=>x.dh>0&&x.last.kondisi!=='Buruk').length;
+  document.getElementById('v7Stagnan').textContent=stag;
+  document.getElementById('v7Perhatian').textContent=perhatian;
+  const tb=document.getElementById('tabelPertumbuhanV8');
+  tb.innerHTML=rows.length?rows.map(x=>{
+    const st=x.status==='Bertumbuh'?'status-baik':(x.status==='Stagnan'?'status-sedang':'status-buruk');
+    return `<tr><td><b>${esc(x.kode)}</b></td><td>${esc(x.jenis)}</td><td>${x.monitoring}</td><td>${x.dh>=0?'+':''}${x.dh.toFixed(1)} cm</td><td>${x.dd>=0?'+':''}${x.dd.toFixed(1)} cm</td><td>${x.rate.toFixed(2)} cm/bln</td><td class="status-${String(x.last.kondisi).toLowerCase()}">${esc(x.last.kondisi)}</td><td class="${st}">${x.status}</td></tr>`;
+  }).join(''):'<tr><td colspan="8" class="empty">Belum ada data monitoring.</td></tr>';
+  const warnings=[];
+  rows.forEach(x=>{
+    if(x.last.kondisi==='Buruk')warnings.push(`${esc(x.kode)} berstatus Buruk.`);
+    if(x.dh<0)warnings.push(`${esc(x.kode)} mengalami penurunan tinggi ${Math.abs(x.dh).toFixed(1)} cm.`);
+    if(x.dd<0)warnings.push(`${esc(x.kode)} mengalami penurunan diameter ${Math.abs(x.dd).toFixed(1)} cm.`);
+    if(x.stale)warnings.push(`${esc(x.kode)} belum dimonitor dalam 90 hari terakhir.`);
+  });
+  document.getElementById('v7Peringatan').innerHTML=warnings.length?'<b>⚠️ Peringatan:</b><br>'+warnings.slice(0,8).map(x=>'• '+x).join('<br>')+(warnings.length>8?`<br><span class="small">+ ${warnings.length-8} peringatan lainnya</span>`:''):'<b>✓ Kondisi monitoring:</b> tidak ada peringatan otomatis.';
+}
+function renderPilihanPetaV7(){
+  const sel=document.getElementById('pilihLokasiPetaV8'),old=sel.value,seen={};
+  dataTanaman.forEach(d=>{if(d.latitude&&d.longitude){const key=(d.lokasi||'Tanpa lokasi')+'||'+(d.petak||'-');if(!seen[key])seen[key]={key,lokasi:d.lokasi||'Tanpa lokasi',petak:d.petak||'-',lat:d.latitude,lon:d.longitude,desa:d.desa||'-',kecamatan:d.kecamatan||'-'};}});
+  const arr=Object.values(seen).sort((a,b)=>a.key.localeCompare(b.key));
+  sel.innerHTML='<option value="">Pilih lokasi/petak</option>'+arr.map(x=>`<option value="${esc(x.key)}">${esc(x.lokasi)} / ${esc(x.petak)} — ${esc(x.desa)}</option>`).join('');
+  if(arr.some(x=>x.key===old)){sel.value=old;tampilkanPetaV7(old)}
+  else if(arr.length===1){sel.value=arr[0].key;tampilkanPetaV7(arr[0].key)}
+}
+function tampilkanPetaV7(key){
+  const info=document.getElementById('petaInfoV8'),frame=document.getElementById('petaFrameV8'),iframe=document.getElementById('iframePetaV8');
+  if(!key){frame.style.display='none';info.textContent='Pilih lokasi/petak yang memiliki koordinat.';return}
+  const d=dataTanaman.find(x=>(x.lokasi||'Tanpa lokasi')+'||'+(x.petak||'-')===key&&x.latitude&&x.longitude);
+  if(!d){frame.style.display='none';info.textContent='Koordinat lokasi tidak ditemukan.';return}
+  const lat=Number(d.latitude),lon=Number(d.longitude);
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)){frame.style.display='none';info.textContent='Koordinat tidak valid.';return}
+  iframe.src='https://www.google.com/maps?q='+encodeURIComponent(lat+','+lon)+'&output=embed';
+  frame.style.display='block';
+  info.innerHTML=`<b>${esc(d.lokasi||'Tanpa lokasi')} / ${esc(d.petak||'-')}</b> · ${esc(d.desa||'-')}, ${esc(d.kecamatan||'-')} · Koordinat: ${lat.toFixed(6)}, ${lon.toFixed(6)} · <a class="v6-link" target="_blank" href="https://www.google.com/maps?q=${encodeURIComponent(lat+','+lon)}">Buka Google Maps</a>`;
+}
+function lokasiTerakhirV7(){
+  const arr=dataTanaman.filter(d=>d.latitude&&d.longitude).sort((a,b)=>(a.tanggal||'').localeCompare(b.tanggal||''));
+  if(!arr.length){showToast('Belum ada koordinat lokasi');return}
+  const d=arr[arr.length-1],key=(d.lokasi||'Tanpa lokasi')+'||'+(d.petak||'-');
+  const sel=document.getElementById('pilihLokasiPetaV8');sel.value=key;tampilkanPetaV7(key);
+}
+function analitikV8(){
+  const rows=ringkasTanamanV7();
+  const active=rows.filter(x=>!x.stale);
+  const rates=rows.filter(x=>Number.isFinite(x.rate)).map(x=>x.rate);
+  const avgRate=rates.length?rates.reduce((a,b)=>a+b,0)/rates.length:0;
+  const jatuh=rows.filter(x=>x.stale).length;
+  const locations=new Set(dataTanaman.map(d=>(d.lokasi||'Tanpa lokasi')+'||'+(d.petak||'-'))).size;
+  const fields=['kode','jenis','tinggi','diameter','umur','tanggal','kondisi','lokasi'];
+  let filled=0,total=dataTanaman.length*fields.length;
+  dataTanaman.forEach(d=>fields.forEach(k=>{if(d[k]!==undefined&&d[k]!==null&&String(d[k]).trim()!=='')filled++}));
+  const complete=total?Math.round(filled/total*100):0;
+  document.getElementById('v8LajuTinggi').textContent=avgRate.toFixed(2)+' cm/bln';
+  document.getElementById('v8JatuhTempo').textContent=jatuh;
+  document.getElementById('v8Kelengkapan').textContent=complete+'%';
+  document.getElementById('v8Lokasi').textContent=locations;
+  let insight='Belum ada data monitoring yang cukup untuk membuat insight.';
+  if(rows.length){
+    const terbaik=rows.slice().sort((a,b)=>b.rate-a.rate)[0];
+    const warning=[];
+    if(jatuh) warning.push(jatuh+' tanaman perlu dijadwalkan monitoring ulang');
+    if(terbaik) warning.push('laju pertumbuhan tinggi tertinggi: '+esc(terbaik.kode)+' ('+terbaik.rate.toFixed(2)+' cm/bln)');
+    if(complete<80) warning.push('kelengkapan data masih '+complete+'%');
+    insight=warning.length?'<b>💡 Insight:</b> '+warning.join(' · '):'<b>✓ Insight:</b> Data monitoring relatif lengkap dan tidak ada tanaman yang melewati batas 90 hari.';
+  }
+  document.getElementById('v8Insight').innerHTML=insight;
+}
+
+function tanggalISO(d){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function tambahHari(tgl,hari){const d=new Date(tgl+'T00:00:00');d.setDate(d.getDate()+hari);return tanggalISO(d)}
+function diffHari(a,b){return Math.ceil((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000)}
+function jadwalV9(){
+  const by={};
+  dataTanaman.forEach(d=>{if(!d.kode)return; if(!by[d.kode])by[d.kode]=[]; by[d.kode].push(d)});
+  const today=tanggalISO(new Date()), rows=[]; let tempo=0,dekat=0,aktif=0;
+  Object.keys(by).forEach(k=>{
+    const r=by[k].filter(x=>x.tanggal).sort((a,b)=>String(a.tanggal).localeCompare(String(b.tanggal)));
+    if(!r.length)return;
+    const last=r[r.length-1], next=tambahHari(last.tanggal,90), delta=diffHari(today,next);
+    let status='Aktif'; if(delta<0){status='Jatuh Tempo';tempo++} else if(delta<=30){status='Segera';dekat++} else aktif++;
+    rows.push({kode:k,jenis:last.jenis,last:last.tanggal,next,delta,kondisi:last.kondisi,status});
+  });
+  rows.sort((a,b)=>a.delta-b.delta);
+  document.getElementById('v9Tempo').textContent=tempo;document.getElementById('v9Dekat').textContent=dekat;document.getElementById('v9Aktif').textContent=aktif;
+  document.getElementById('tabelJadwalV9').innerHTML=rows.length?rows.map(x=>{
+    const sel=x.delta<0?Math.abs(x.delta)+' hari terlambat':x.delta===0?'Hari ini':x.delta+' hari lagi';
+    const cls=x.status==='Jatuh Tempo'?'status-buruk':x.status==='Segera'?'status-sedang':'status-baik';
+    return `<tr><td><b>${esc(x.kode)}</b></td><td>${esc(x.jenis)}</td><td>${fmt(x.last)}</td><td>${fmt(x.next)}</td><td>${sel}</td><td>${esc(x.kondisi)}</td><td class="${cls}"><b>${x.status}</b></td></tr>`;
+  }).join(''):'<tr><td colspan="7" class="empty">Belum ada data monitoring bertanggal.</td></tr>';
+}
+function cetakJadwalV9(){window.print()}
+
+
+function rekomendasiV10(){
+  const groups={};
+  dataTanaman.forEach(d=>{if(!groups[d.kode])groups[d.kode]=[];groups[d.kode].push(d)});
+  const today=tanggalISO(new Date()), rows=[];
+  Object.values(groups).forEach(r=>{
+    r.sort((a,b)=>String(a.tanggal||'').localeCompare(String(b.tanggal||'')));
+    const last=r[r.length-1], first=r[0];
+    if(!last)return;
+    const dh=Number(last.tinggi||0)-Number(first.tinggi||0);
+    const dd=Number(last.diameter||0)-Number(first.diameter||0);
+    const days=last.tanggal?Math.max(0,diffHari(last.tanggal,today)):9999;
+    let score=0;
+    if(last.kondisi==='Buruk')score+=5; else if(last.kondisi==='Sedang')score+=2;
+    if(dh<0)score+=3; else if(dh===0)score+=1;
+    if(dd<0)score+=2;
+    if(days>90)score+=3; else if(days>60)score+=1;
+    if(!last.tanggal)score+=4;
+    let prioritas='Rendah', cls='status-baik';
+    if(score>=5){prioritas='Tinggi';cls='status-buruk'} else if(score>=2){prioritas='Sedang';cls='status-sedang'}
+    let rekom='Lanjutkan monitoring rutin.';
+    if(last.kondisi==='Buruk')rekom='Lakukan pemeriksaan lapangan segera dan catat penyebab kerusakan.';
+    else if(dh<0||dd<0)rekom='Periksa kesehatan tanaman, gangguan, dan kondisi tapak; lakukan pengukuran ulang.';
+    else if(days>90)rekom='Jadwalkan monitoring segera karena sudah lebih dari 90 hari.';
+    else if(last.kondisi==='Sedang'||dh===0)rekom='Lakukan monitoring lebih dekat dan evaluasi faktor pembatas pertumbuhan.';
+    rows.push({kode:last.kode,jenis:last.jenis,lokasi:last.lokasi||'-',petak:last.petak||'-',kondisi:last.kondisi,dh,dd,days,prioritas,cls,rekom,score});
+  });
+  rows.sort((a,b)=>b.score-a.score||b.days-a.days||a.kode.localeCompare(b.kode));
+  const tinggi=rows.filter(x=>x.prioritas==='Tinggi').length, sedang=rows.filter(x=>x.prioritas==='Sedang').length, rendah=rows.filter(x=>x.prioritas==='Rendah').length;
+  document.getElementById('v10PrioritasTinggi').textContent=tinggi;
+  document.getElementById('v10PrioritasSedang').textContent=sedang;
+  document.getElementById('v10PrioritasRendah').textContent=rendah;
+  const insight=document.getElementById('v10Insight');
+  if(!rows.length) insight.textContent='Belum ada data monitoring.';
+  else insight.innerHTML=`Dari <b>${rows.length}</b> tanaman unik: <b>${tinggi}</b> prioritas tinggi, <b>${sedang}</b> prioritas sedang, dan <b>${rendah}</b> prioritas rendah. Tanaman prioritas tinggi sebaiknya menjadi fokus monitoring lapangan berikutnya.`;
+  const tb=document.getElementById('tabelRekomendasiV10');
+  tb.innerHTML=rows.length?rows.map(x=>`<tr><td class="${x.cls}"><b>${x.prioritas}</b></td><td><b>${esc(x.kode)}</b></td><td>${esc(x.jenis)}</td><td>${esc(x.lokasi)} / ${esc(x.petak)}</td><td class="status-${x.kondisi.toLowerCase()}">${esc(x.kondisi)}</td><td>${x.dh>=0?'+':''}${x.dh.toFixed(1)} cm</td><td>${x.days>9000?'-':x.days+' hari'}</td><td>${esc(x.rekom)}</td></tr>`).join(''):'<tr><td colspan="8" class="empty">Belum ada data tanaman.</td></tr>';
+  const now=new Date();
+  const baik=dataTanaman.filter(d=>d.kondisi==='Baik').length, buruk=dataTanaman.filter(d=>d.kondisi==='Buruk').length;
+  const unik=new Set(dataTanaman.map(d=>d.kode)).size;
+  const avgH=dataTanaman.length?(dataTanaman.reduce((a,d)=>a+Number(d.tinggi||0),0)/dataTanaman.length).toFixed(1):'0';
+  const avgD=dataTanaman.length?(dataTanaman.reduce((a,d)=>a+Number(d.diameter||0),0)/dataTanaman.length).toFixed(1):'0';
+  document.getElementById('laporanRingkasV10').innerHTML=`<b>Ringkasan per ${fmt(tanggalISO(now))}</b><br><br>Total data monitoring: <b>${dataTanaman.length}</b> · Tanaman unik: <b>${unik}</b> · Kondisi baik: <b>${baik}</b> · Kondisi buruk: <b>${buruk}</b><br>Rata-rata tinggi: <b>${avgH} cm</b> · Rata-rata diameter: <b>${avgD} cm</b> · Prioritas tinggi: <b>${tinggi}</b>.<br><br><b>Fokus lapangan:</b> ${tinggi?'dahulukan tanaman prioritas tinggi, terutama yang berkondisi buruk, mengalami penurunan biometrik, atau terlambat dimonitor.':'belum ada tanaman yang masuk prioritas tinggi; pertahankan monitoring rutin sesuai jadwal.'}`;
+}
+function cetakRekomendasiV10(){window.print()}
+function cetakLaporanV10(){window.print()}
+
+
+function auditV11Data(){
+  const required=[['kode','Kode Tanaman'],['jenis','Jenis Tanaman'],['tinggi','Tinggi'],['diameter','Diameter'],['tanggal','Tanggal Monitoring'],['kondisi','Kondisi'],['lokasi','Lokasi']];
+  const seen={}; dataTanaman.forEach((d,i)=>{const key=String(d.kode||'').trim()+'||'+String(d.tanggal||'').trim(); if(d.kode&&d.tanggal){if(!seen[key])seen[key]=[];seen[key].push(i)}});
+  const issues=[];
+  dataTanaman.forEach((d,i)=>{
+    const add=(jenis,detail,saran)=>issues.push({i,kode:d.kode||'-',jenisTanaman:d.jenis||'-',tanggal:d.tanggal||'-',masalah:jenis,detail,saran});
+    const missing=required.filter(([k])=>d[k]===undefined||d[k]===null||String(d[k]).trim()==='');
+    if(missing.length) add('Kosong','Field: '+missing.map(x=>x[1]).join(', '),'Lengkapi field wajib sebelum analisis.');
+    const tinggi=Number(d.tinggi),diameter=Number(d.diameter),luas=Number(d.luas);
+    if(d.tinggi!==''&&d.tinggi!=null&&(!Number.isFinite(tinggi)||tinggi<0)) add('Tidak Valid','Tinggi harus berupa angka ≥ 0.','Periksa nilai tinggi tanaman.');
+    if(d.diameter!==''&&d.diameter!=null&&(!Number.isFinite(diameter)||diameter<0)) add('Tidak Valid','Diameter harus berupa angka ≥ 0.','Periksa nilai diameter batang.');
+    if(d.luas!==''&&d.luas!=null&&(!Number.isFinite(luas)||luas<0)) add('Tidak Valid','Luas lahan harus berupa angka ≥ 0.','Periksa nilai luas lahan.');
+    if(d.latitude!==''&&d.latitude!=null&&(!Number.isFinite(Number(d.latitude))||Number(d.latitude)<-90||Number(d.latitude)>90)) add('Tidak Valid','Latitude di luar rentang -90 sampai 90.','Periksa koordinat latitude.');
+    if(d.longitude!==''&&d.longitude!=null&&(!Number.isFinite(Number(d.longitude))||Number(d.longitude)<-180||Number(d.longitude)>180)) add('Tidak Valid','Longitude di luar rentang -180 sampai 180.','Periksa koordinat longitude.');
+    const hasLat=d.latitude!==undefined&&d.latitude!==null&&String(d.latitude).trim()!==''; const hasLon=d.longitude!==undefined&&d.longitude!==null&&String(d.longitude).trim()!=='';
+    if(hasLat!==hasLon) add('Koordinat Tidak Lengkap','Latitude dan longitude harus diisi berpasangan.','Lengkapi pasangan koordinat atau kosongkan keduanya.');
+    if(d.tanggal){const dt=new Date(d.tanggal+'T00:00:00'),today=new Date();today.setHours(23,59,59,999);if(Number.isNaN(dt.getTime())) add('Tidak Valid','Format tanggal tidak dikenali.','Masukkan tanggal monitoring yang valid.'); else if(dt>today) add('Tanggal Masa Depan','Tanggal monitoring melebihi hari ini.','Periksa kembali tanggal pengamatan.');}
+    if(d.kode&&d.tanggal&&seen[String(d.kode).trim()+'||'+String(d.tanggal).trim()].length>1) add('Duplikat','Kode dan tanggal sama dengan record lain.','Gabungkan/hapus record duplikat setelah diverifikasi.');
+  });
+  return issues;
+}
+function auditV11(){
+  const issues=auditV11Data(), n=dataTanaman.length, filter=document.getElementById('v11FilterMasalah')?.value||'Semua';
+  const byRecord=new Set(issues.map(x=>x.i));
+  const invalid=issues.filter(x=>x.masalah==='Tidak Valid'||x.masalah==='Tanggal Masa Depan'||x.masalah==='Koordinat Tidak Lengkap').length;
+  const missing=issues.filter(x=>x.masalah==='Kosong').length;
+  const duplicate=issues.filter(x=>x.masalah==='Duplikat').length;
+  const complete=Math.max(0,n-byRecord.size);
+  const score=n?Math.max(0,Math.round(100-(byRecord.size/n*60)-(invalid/n*25)-(duplicate/n*15))):100;
+  document.getElementById('v11Skor').textContent=score+'%'; document.getElementById('v11Meter').style.width=score+'%';
+  document.getElementById('v11Skor').className='v11-score '+(score>=90?'v11-good':score>=70?'v11-warn':'v11-bad');
+  document.getElementById('v11Lengkap').textContent=complete; document.getElementById('v11Kosong').textContent=missing; document.getElementById('v11Invalid').textContent=invalid; document.getElementById('v11Duplikat').textContent=duplicate;
+  let insight='Belum ada data untuk diaudit.';
+  if(n){ if(!issues.length) insight='<b>✓ Data bersih:</b> tidak ditemukan masalah pada pemeriksaan V11.'; else insight='<b>⚠️ Perlu perbaikan:</b> '+byRecord.size+' dari '+n+' record memiliki minimal satu temuan. Prioritaskan field kosong dan nilai tidak valid sebelum membuat analisis lanjutan.'; }
+  document.getElementById('v11Insight').innerHTML=insight;
+  const shown=filter==='Semua'?issues:issues.filter(x=>x.masalah===filter);
+  const tb=document.getElementById('tabelAuditV11');
+  tb.innerHTML=shown.length?shown.map((x,k)=>{const cls=x.masalah==='Kosong'?'missing':x.masalah==='Duplikat'?'duplicate':x.masalah==='Tanggal Masa Depan'?'future':x.masalah==='Koordinat Tidak Lengkap'?'coordinate':'invalid';return `<tr><td>${k+1}</td><td><b>${esc(x.kode)}</b></td><td>${esc(x.jenisTanaman)}</td><td>${fmt(x.tanggal)}</td><td><span class="v11-tag ${cls}">${esc(x.masalah)}</span></td><td>${esc(x.detail)}</td><td>${esc(x.saran)}</td></tr>`}).join(''):'<tr><td colspan="7" class="empty">Tidak ada temuan untuk filter ini.</td></tr>';
+}
+function exportAuditV11(){
+  const issues=auditV11Data(), head=['No','Kode','Jenis','Tanggal','Masalah','Detail','Saran Perbaikan'], rows=[head,...issues.map((x,i)=>[i+1,x.kode,x.jenisTanaman,x.tanggal,x.masalah,x.detail,x.saran])];
+  const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\
+'); download('silvigrow_v11_audit.csv',csv,'text/csv;charset=utf-8'); showToast('Audit V11 berhasil diekspor');
+}
+function cetakAuditV11(){window.print()}
+
+function prioritasTindakLanjutV12(d){
+  const groups={};
+  dataTanaman.forEach(x=>{if(!groups[x.kode])groups[x.kode]=[];groups[x.kode].push(x)});
+  const r=(groups[d.kode]||[]).slice().sort((a,b)=>String(a.tanggal||'').localeCompare(String(b.tanggal||'')));
+  const first=r[0]||d,last=r[r.length-1]||d;
+  const dh=Number(last.tinggi||0)-Number(first.tinggi||0);
+  const dd=Number(last.diameter||0)-Number(first.diameter||0);
+  const days=last.tanggal?Math.max(0,diffHari(last.tanggal,tanggalISO(new Date()))):9999;
+  let score=0;
+  if(last.kondisi==='Buruk')score+=5; else if(last.kondisi==='Sedang')score+=2;
+  if(dh<0)score+=3; else if(dh===0)score+=1; if(dd<0)score+=2;
+  if(days>90)score+=3; else if(days>60)score+=1; if(!last.tanggal)score+=4;
+  return score>=5?'Tinggi':score>=2?'Sedang':'Rendah';
+}
+function tampilkanTindakLanjutV12(){
+  const status=document.getElementById('v12FilterStatus')?.value||'Semua Status', pf=document.getElementById('v12FilterPrioritas')?.value||'Semua Prioritas';
+  const groups={}; dataTanaman.forEach(d=>{if(!groups[d.kode])groups[d.kode]=[];groups[d.kode].push(d)});
+  const rows=Object.values(groups).map(r=>r.slice().sort((a,b)=>String(a.tanggal||'').localeCompare(String(b.tanggal||''))).pop()).filter(Boolean).map(d=>({...d,prioritas:prioritasTindakLanjutV12(d)}));
+  const shown=rows.filter(d=>(status==='Semua Status'||d.statusTindakLanjut===status)&&(pf==='Semua Prioritas'||d.prioritas===pf));
+  const tb=document.getElementById('tabelTindakLanjutV12');
+  tb.innerHTML=shown.length?shown.map((d,n)=>{const i=dataTanaman.indexOf(d);const cls=d.statusTindakLanjut==='Selesai'?'done':d.statusTindakLanjut==='Dalam Proses'?'process':'open';const pc=d.prioritas==='Tinggi'?'status-buruk':d.prioritas==='Sedang'?'status-sedang':'status-baik';return `<tr><td>${n+1}</td><td class="${pc}"><b>${d.prioritas}</b></td><td><b>${esc(d.kode)}</b></td><td>${esc(d.jenis)}</td><td>${esc(d.lokasi||'-')} / ${esc(d.petak||'-')}</td><td class="status-${String(d.kondisi).toLowerCase()}">${esc(d.kondisi)}</td><td><span class="v12-status ${cls}">${esc(d.statusTindakLanjut)}</span></td><td>${fmt(d.tanggalTindakLanjut)}</td><td>${esc(d.tindakLanjut||'-')}</td><td class="aksi-col"><button class="btn-edit" onclick="editData(${i})">Edit</button></td></tr>`}).join(''):'<tr><td colspan="10" class="empty">Belum ada tindak lanjut yang sesuai filter.</td></tr>';
+  const open=rows.filter(d=>d.statusTindakLanjut==='Belum Ditindaklanjuti').length, process=rows.filter(d=>d.statusTindakLanjut==='Dalam Proses').length, done=rows.filter(d=>d.statusTindakLanjut==='Selesai').length, high=rows.filter(d=>d.prioritas==='Tinggi'&&d.statusTindakLanjut!=='Selesai').length;
+  document.getElementById('v12Belum').textContent=open;document.getElementById('v12Proses').textContent=process;document.getElementById('v12SelesaiBox').textContent=done;document.getElementById('v12PrioritasTerbuka').textContent=high;document.getElementById('v12Terbuka').textContent=open+process;document.getElementById('v12Selesai').textContent=done;
+}
+function exportTindakLanjutV12(){
+  const groups={};dataTanaman.forEach(d=>{if(!groups[d.kode])groups[d.kode]=[];groups[d.kode].push(d)});
+  const rows=Object.values(groups).map(r=>r.slice().sort((a,b)=>String(a.tanggal||'').localeCompare(String(b.tanggal||''))).pop()).filter(Boolean);
+  const head=['No','Prioritas','Kode','Jenis','Lokasi','Petak','Kondisi','Status','Tanggal Tindakan','Tindakan / Hasil'];
+  const csv=[head,...rows.map((d,i)=>[i+1,prioritasTindakLanjutV12(d),d.kode,d.jenis,d.lokasi,d.petak,d.kondisi,d.statusTindakLanjut,d.tanggalTindakLanjut,d.tindakLanjut])].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  download('silvigrow_v12_tindak_lanjut.csv',csv,'text/csv;charset=utf-8');showToast('Tindak lanjut V12 berhasil diekspor');
+}
+function cetakTindakLanjutV12(){window.print()}
+
+
+let mapV13=null, markersV13=[], markerGroupsV14=[], selectedMarkerV14=null;
+function kondisiTerakhirV13(items){
+  if(!items.length)return '-';
+  const sorted=[...items].sort((a,b)=>(a.tanggal||'').localeCompare(b.tanggal||''));
+  return sorted[sorted.length-1].kondisi||'-';
+}
+function warnaKondisiV13(k){return k==='Baik'?'#16a34a':k==='Sedang'?'#f59e0b':k==='Buruk'?'#dc2626':'#2563eb'}
+function buatMarkerV13(lat,lon,color){return L.circleMarker([lat,lon],{radius:9,weight:2,color:'#fff',fillColor:color,fillOpacity:.9})}
+function initPetaV13(){
+  if(mapV13||typeof L==='undefined')return;
+  mapV13=L.map('mapV13',{scrollWheelZoom:true,zoomControl:true}).setView([-2.5,117],5);
+  const street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'});
+  const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles &copy; Esri'});
+  const topo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'Map data &copy; OpenTopoMap contributors'});
+  street.addTo(mapV13);
+  L.control.layers({'Jalan':street,'Satelit':satellite,'Topografi':topo},null,{collapsed:false}).addTo(mapV13);
+  mapV13.on('click',e=>{
+    const lat=e.latlng.lat.toFixed(6),lon=e.latlng.lng.toFixed(6);
+    const latEl=document.getElementById('latitude'),lonEl=document.getElementById('longitude');
+    if(latEl&&lonEl){latEl.value=lat;lonEl.value=lon;showToast('Koordinat peta dimasukkan ke formulir: '+lat+', '+lon);}
+    if(selectedMarkerV14){mapV13.removeLayer(selectedMarkerV14);selectedMarkerV14=null;}
+    selectedMarkerV14=L.circleMarker([e.latlng.lat,e.latlng.lng],{radius:7,weight:2,color:'#2563eb',fillColor:'#2563eb',fillOpacity:.35,dashArray:'4,4'}).addTo(mapV13);
+    selectedMarkerV14.bindTooltip('Koordinat pilihan: '+lat+', '+lon,{permanent:true,direction:'top'}).openTooltip();
+  });
+  setTimeout(()=>mapV13.invalidateSize(),200);
+}
+function kelompokPetaV14(){
+  const grouped={};
+  dataTanaman.forEach(d=>{
+    const lat=Number(d.latitude),lon=Number(d.longitude);
+    if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat<-90||lat>90||lon<-180||lon>180)return;
+    const key=(d.lokasi||'Tanpa lokasi')+'||'+(d.petak||'-');
+    if(!grouped[key])grouped[key]={key,lokasi:d.lokasi||'Tanpa lokasi',petak:d.petak||'-',desa:d.desa||'-',kecamatan:d.kecamatan||'-',lat,lon,items:[]};
+    grouped[key].items.push(d);
+  });
+  return Object.values(grouped);
+}
+function renderPetaV13(){
+  initPetaV13(); if(!mapV13)return;
+  markersV13.forEach(m=>mapV13.removeLayer(m)); markersV13=[];
+  const fk=document.getElementById('v13FilterKondisi')?.value||'Semua';
+  const fl=document.getElementById('v13FilterLokasi')?.value||'';
+  const q=(document.getElementById('v14CariPeta')?.value||'').toLowerCase().trim();
+  const all=kelompokPetaV14();
+  const filtered=all.filter(g=>{
+    const k=kondisiTerakhirV13(g.items);
+    const hay=[g.lokasi,g.petak,g.desa,g.kecamatan,...g.items.map(x=>x.kode+' '+x.jenis)].join(' ').toLowerCase();
+    return (fk==='Semua'||k===fk)&&(fl===''||g.lokasi===fl)&&(!q||hay.includes(q));
+  });
+  let baik=0,sedang=0,buruk=0;
+  all.forEach(g=>{const k=kondisiTerakhirV13(g.items);if(k==='Baik')baik++;else if(k==='Sedang')sedang++;else if(k==='Buruk')buruk++});
+  document.getElementById('v13TotalMap').textContent=all.length;document.getElementById('v13BaikMap').textContent=baik;document.getElementById('v13SedangMap').textContent=sedang;document.getElementById('v13BurukMap').textContent=buruk;
+  const info=document.getElementById('petaInfoV13'),status=document.getElementById('v14MapStatus');
+  if(!all.length){info.textContent='Belum ada data dengan latitude dan longitude yang valid.';status.textContent='0 lokasi berkoordinat';mapV13.setView([-2.5,117],5);return}
+  info.innerHTML=`Menampilkan <b>${filtered.length}</b> dari <b>${all.length}</b> petak berkoordinat. Klik marker untuk detail atau klik peta untuk memilih koordinat.`;
+  status.textContent=`${filtered.length} lokasi tampil · ${all.length} lokasi berkoordinat`;
+  const bounds=[];
+  filtered.forEach(g=>{
+    const k=kondisiTerakhirV13(g.items),color=warnaKondisiV13(k),marker=buatMarkerV13(g.lat,g.lon,color);
+    const latest=[...g.items].sort((a,b)=>(a.tanggal||'').localeCompare(b.tanggal||''))[g.items.length-1];
+    const monitoringCount=g.items.length;
+    marker.bindPopup(`<b>${esc(g.lokasi)} / ${esc(g.petak)}</b><br>${esc(g.desa)}, ${esc(g.kecamatan)}<br><b>Kondisi:</b> ${esc(k)}<br><b>Jenis:</b> ${esc(latest.jenis||'-')}<br><b>Tinggi:</b> ${esc(latest.tinggi||'-')} cm · <b>Diameter:</b> ${esc(latest.diameter||'-')} cm<br><b>Monitoring:</b> ${monitoringCount} kali<br><b>Tanggal terbaru:</b> ${esc(latest.tanggal||'-')}<br><span class="v14-coord">${g.lat.toFixed(6)}, ${g.lon.toFixed(6)}</span><br><button class="btn-info" style="margin-top:7px" onclick="salinKoordinatV14(${g.lat},${g.lon})">📋 Salin Koordinat</button> <a class="v6-link" target="_blank" href="https://www.google.com/maps?q=${encodeURIComponent(g.lat+','+g.lon)}">Buka Google Maps</a>`);
+    marker.on('click',()=>{selectedMarkerV14=marker;});
+    marker.addTo(mapV13);markersV13.push(marker);bounds.push([g.lat,g.lon]);
+  });
+  if(bounds.length&&!q)mapV13.fitBounds(bounds,{padding:[30,30],maxZoom:16});
+}
+function renderPetaV14(){renderPetaV13();jalankanValidasiV15();analisisLaporanV16()}
+function renderFilterPetaV13(){
+  const sel=document.getElementById('v13FilterLokasi'),old=sel.value;
+  const vals=[...new Set(dataTanaman.filter(d=>Number.isFinite(Number(d.latitude))&&Number.isFinite(Number(d.longitude))).map(d=>d.lokasi||'Tanpa lokasi'))].sort();
+  sel.innerHTML='<option value="">Semua Lokasi</option>'+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+  if(vals.includes(old))sel.value=old;
+}
+function fitPetaV13(){renderPetaV13();jalankanValidasiV15();analisisLaporanV16()}
+function lokasiTerakhirV13(){
+  const arr=dataTanaman.filter(d=>Number.isFinite(Number(d.latitude))&&Number.isFinite(Number(d.longitude))).sort((a,b)=>(a.tanggal||'').localeCompare(b.tanggal||''));
+  if(!arr.length){showToast('Belum ada koordinat lokasi');return}
+  const d=arr[arr.length-1],lat=Number(d.latitude),lon=Number(d.longitude);initPetaV13();mapV13.setView([lat,lon],17);
+  const m=buatMarkerV13(lat,lon,warnaKondisiV13(d.kondisi||'-')).addTo(mapV13);m.bindPopup(`<b>${esc(d.lokasi||'Tanpa lokasi')} / ${esc(d.petak||'-')}</b><br>Monitoring terbaru: ${esc(d.tanggal||'-')}<br>Kondisi: ${esc(d.kondisi||'-')}<br><span class="v14-coord">${lat.toFixed(6)}, ${lon.toFixed(6)}</span>`).openPopup();setTimeout(()=>m.remove(),7000);
+}
+function lokasiPerangkatV14(){
+  if(!navigator.geolocation){showToast('Browser tidak mendukung lokasi perangkat');return}
+  showToast('Meminta izin lokasi perangkat...');
+  navigator.geolocation.getCurrentPosition(pos=>{const lat=pos.coords.latitude,lon=pos.coords.longitude;initPetaV13();mapV13.setView([lat,lon],17);const m=L.circleMarker([lat,lon],{radius:10,weight:3,color:'#fff',fillColor:'#2563eb',fillOpacity:.85}).addTo(mapV13);m.bindPopup(`<b>📍 Lokasi perangkat</b><br><span class="v14-coord">${lat.toFixed(6)}, ${lon.toFixed(6)}</span>`).openPopup();setTimeout(()=>m.remove(),10000);},()=>showToast('Lokasi perangkat tidak dapat diakses. Pastikan izin lokasi browser diberikan.'));
+}
+function fokusIndonesiaV14(){initPetaV13();mapV13.setView([-2.5,117],5);renderPetaV13();jalankanValidasiV15()}
+function resetPetaV14(){const q=document.getElementById('v14CariPeta');if(q)q.value='';const fk=document.getElementById('v13FilterKondisi'),fl=document.getElementById('v13FilterLokasi');if(fk)fk.value='Semua';if(fl)fl.value='';fokusIndonesiaV14();}
+function salinKoordinatV14(lat,lon){const text=Number(lat).toFixed(6)+', '+Number(lon).toFixed(6);if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(()=>showToast('Koordinat berhasil disalin')).catch(()=>showToast(text))}else{window.prompt('Salin koordinat berikut:',text)}}
+
+
+function prioritasV16(d){
+  const rows=ringkasTanamanV7(); const x=rows.find(r=>r.kode===d.kode);
+  if(!x)return 'Rendah';
+  const rec=rekomendasiRingkasV16(d,x); return rec.prioritas;
+}
+function rekomendasiRingkasV16(d,x){
+  let score=0; const days=d.tanggal?Math.max(0,diffHari(d.tanggal,tanggalISO(new Date()))):9999;
+  if(d.kondisi==='Buruk')score+=5; else if(d.kondisi==='Sedang')score+=2;
+  if(x.dh<0)score+=3; else if(x.dh===0)score+=1; if(x.dd<0)score+=2;
+  if(days>90)score+=3; else if(days>60)score+=1; if(!d.tanggal)score+=4;
+  return {prioritas:score>=5?'Tinggi':score>=2?'Sedang':'Rendah'};
+}
+function analisisLaporanV16(){
+  const total=dataTanaman.length, unik=new Set(dataTanaman.map(d=>d.kode).filter(Boolean)).size;
+  const baik=dataTanaman.filter(d=>d.kondisi==='Baik').length,sedang=dataTanaman.filter(d=>d.kondisi==='Sedang').length,buruk=dataTanaman.filter(d=>d.kondisi==='Buruk').length;
+  const lokasi=new Set(dataTanaman.map(d=>(d.lokasi||'Tanpa lokasi')+'||'+(d.petak||'-'))).size;
+  ['Total','Unik','Baik','Sedang','Buruk','Lokasi'].forEach((k,i)=>document.getElementById('v16'+k).textContent=[total,unik,baik,sedang,buruk,lokasi][i]);
+  const avgH=total?(dataTanaman.reduce((a,d)=>a+Number(d.tinggi||0),0)/total).toFixed(1):'0.0';
+  const avgD=total?(dataTanaman.reduce((a,d)=>a+Number(d.diameter||0),0)/total).toFixed(1):'0.0';
+  const dates=dataTanaman.map(d=>d.tanggal).filter(Boolean).sort(); const terakhir=dates.length?fmt(dates[dates.length-1]):'-';
+  const audit=document.getElementById('v11Skor')?.textContent||'-';
+  const tindak=dataTanaman.filter(d=>d.statusTindakLanjut==='Selesai').length;
+  const tinggi=dataTanaman.filter(d=>d.kondisi==='Buruk').length;
+  document.getElementById('laporanProfesionalV16').innerHTML=`<h3>Ringkasan Eksekutif</h3><b>Tanggal laporan:</b> ${fmt(tanggalISO(new Date()))}<br><b>Monitoring terakhir:</b> ${terakhir}<br><b>Rata-rata tinggi:</b> ${avgH} cm · <b>Rata-rata diameter:</b> ${avgD} cm<br><b>Skor kualitas data:</b> ${audit}<br><b>Tindak lanjut selesai:</b> ${tindak} dari ${unik} tanaman unik<br><br><b>Catatan:</b> ${tinggi?'Terdapat '+tinggi+' record berkondisi Buruk yang perlu menjadi perhatian lapangan.':'Tidak terdapat record berkondisi Buruk pada data saat ini.'}`;
+  const groups={}; dataTanaman.forEach(d=>{const key=(d.lokasi||'Tanpa lokasi')+'||'+(d.petak||'-'); if(!groups[key])groups[key]={lokasi:d.lokasi||'Tanpa lokasi',petak:d.petak||'-',desa:d.desa||'-',kecamatan:d.kecamatan||'-',luas:0,pohon:0,baik:0,sedang:0,buruk:0}; const g=groups[key];g.luas=Math.max(g.luas,Number(d.luas)||0);g.pohon=Math.max(g.pohon,Number(d.jumlahPohon)||0);if(d.kondisi==='Baik')g.baik++;if(d.kondisi==='Sedang')g.sedang++;if(d.kondisi==='Buruk')g.buruk++;});
+  const gs=Object.values(groups); document.getElementById('tabelLokasiV16').innerHTML=gs.length?gs.map((g,i)=>`<tr><td>${i+1}</td><td>${esc(g.lokasi)}</td><td>${esc(g.petak)}</td><td>${esc(g.desa)}</td><td>${esc(g.kecamatan)}</td><td>${g.luas.toFixed(2)}</td><td>${g.pohon}</td><td>${g.luas?(g.pohon/g.luas).toFixed(1):'-'}</td><td>${g.baik}</td><td>${g.sedang}</td><td>${g.buruk}</td></tr>`).join(''):'<tr><td colspan="11" class="empty">Belum ada data lokasi.</td></tr>';
+  const rows=ringkasTanamanV7(); document.getElementById('tabelTanamanV16').innerHTML=rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.kode)}</b></td><td>${esc(x.jenis)}</td><td>${x.monitoring}</td><td>${x.dh>=0?'+':''}${x.dh.toFixed(1)} cm</td><td>${x.dd>=0?'+':''}${x.dd.toFixed(1)} cm</td><td>${x.rate.toFixed(2)} cm/bln</td><td class="status-${String(x.last.kondisi).toLowerCase()}">${esc(x.last.kondisi)}</td><td>${esc(prioritasV16(x.last))}</td></tr>`).join(''):'<tr><td colspan="9" class="empty">Belum ada data tanaman.</td></tr>';
+  document.getElementById('footerLaporanV16').textContent='SilviGrow V16 · Laporan dibuat otomatis dari data tersimpan di browser.';
+}
+function exportLaporanV16CSV(){
+  if(!dataTanaman.length){alert('Belum ada data monitoring.');return}
+  const rows=ringkasTanamanV7(); const head=['No','Kode','Jenis','Monitoring','Perubahan Tinggi (cm)','Perubahan Diameter (cm)','Laju Tinggi (cm/bln)','Kondisi Terakhir','Prioritas','Lokasi','Petak'];
+  const out=[head,...rows.map((x,i)=>[i+1,x.kode,x.jenis,x.monitoring,x.dh.toFixed(1),x.dd.toFixed(1),x.rate.toFixed(2),x.last.kondisi,prioritasV16(x.last),x.last.lokasi||'',x.last.petak||''])];
+  const csv='\\ufeff'+out.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(';')).join('\\r\\n'); download('SilviGrow_V16_Laporan.csv',csv,'text/csv;charset=utf-8');showToast('Laporan V16 berhasil diekspor. File CSV dapat dibuka di Excel.');
+}
+function cetakLaporanV16(){document.body.classList.add('v16-printing');window.print();setTimeout(()=>document.body.classList.remove('v16-printing'),500)}
+
+
+function prioritasV16(x){let score=0;const rows=ringkasTanamanV7(),r=rows.find(a=>a.kode===x.kode);if(x.kondisi==='Buruk')score+=5;else if(x.kondisi==='Sedang')score+=2;if(r){if(r.dh<0)score+=3;else if(r.dh===0)score+=1;if(r.dd<0)score+=2}const days=x.tanggal?Math.max(0,diffHari(x.tanggal,tanggalISO(new Date()))):9999;if(days>90)score+=3;else if(days>60)score+=1;if(!x.tanggal)score+=4;return score>=5?'Tinggi':score>=2?'Sedang':'Rendah'}
+function analisisLaporanV16(){const n=dataTanaman.length,u=new Set(dataTanaman.map(d=>d.kode).filter(Boolean)).size,b=dataTanaman.filter(d=>d.kondisi==='Baik').length,s=dataTanaman.filter(d=>d.kondisi==='Sedang').length,r=dataTanaman.filter(d=>d.kondisi==='Buruk').length,l=new Set(dataTanaman.map(d=>(d.lokasi||'Tanpa lokasi')+'||'+(d.petak||'-'))).size;['Total','Unik','Baik','Sedang','Buruk','Lokasi'].forEach((k,i)=>document.getElementById('v16'+k).textContent=[n,u,b,s,r,l][i]);const ah=n?(dataTanaman.reduce((a,d)=>a+Number(d.tinggi||0),0)/n).toFixed(1):'0.0',ad=n?(dataTanaman.reduce((a,d)=>a+Number(d.diameter||0),0)/n).toFixed(1):'0.0',dates=dataTanaman.map(d=>d.tanggal).filter(Boolean).sort(),last=dates.length?fmt(dates[dates.length-1]):'-',done=dataTanaman.filter(d=>d.statusTindakLanjut==='Selesai').length,audit=document.getElementById('v11Skor')?.textContent||'-';document.getElementById('laporanProfesionalV16').innerHTML=`<b>Ringkasan Eksekutif</b><br>Tanggal laporan: <b>${fmt(tanggalISO(new Date()))}</b> · Monitoring terakhir: <b>${last}</b><br>Rata-rata tinggi: <b>${ah} cm</b> · Rata-rata diameter: <b>${ad} cm</b><br>Skor kualitas data: <b>${audit}</b> · Tindak lanjut selesai: <b>${done}</b> record<br><br>${r?`⚠️ Terdapat <b>${r}</b> record berkondisi Buruk.`:'✓ Tidak ada record berkondisi Buruk.'}`;const g={};dataTanaman.forEach(d=>{const k=(d.lokasi||'Tanpa lokasi')+'||'+(d.petak||'-');if(!g[k])g[k]={lokasi:d.lokasi||'Tanpa lokasi',petak:d.petak||'-',desa:d.desa||'-',kecamatan:d.kecamatan||'-',luas:0,pohon:0,baik:0,sedang:0,buruk:0};const q=g[k];q.luas=Math.max(q.luas,Number(d.luas)||0);q.pohon=Math.max(q.pohon,Number(d.jumlahPohon)||0);if(d.kondisi==='Baik')q.baik++;if(d.kondisi==='Sedang')q.sedang++;if(d.kondisi==='Buruk')q.buruk++});const gs=Object.values(g);document.getElementById('tabelLokasiV16').innerHTML=gs.length?gs.map((q,i)=>`<tr><td>${i+1}</td><td>${esc(q.lokasi)}</td><td>${esc(q.petak)}</td><td>${esc(q.desa)}</td><td>${esc(q.kecamatan)}</td><td>${q.luas.toFixed(2)}</td><td>${q.pohon}</td><td>${q.luas?(q.pohon/q.luas).toFixed(1):'-'}</td><td>${q.baik}</td><td>${q.sedang}</td><td>${q.buruk}</td></tr>`).join(''):'<tr><td colspan="11" class="empty">Belum ada data lokasi.</td></tr>';const rows=ringkasTanamanV7();document.getElementById('tabelTanamanV16').innerHTML=rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.kode)}</b></td><td>${esc(x.jenis)}</td><td>${x.monitoring}</td><td>${x.dh>=0?'+':''}${x.dh.toFixed(1)} cm</td><td>${x.dd>=0?'+':''}${x.dd.toFixed(1)} cm</td><td>${x.rate.toFixed(2)} cm/bln</td><td class="status-${String(x.last.kondisi).toLowerCase()}">${esc(x.last.kondisi)}</td><td>${prioritasV16(x.last)}</td></tr>`).join(''):'<tr><td colspan="9" class="empty">Belum ada data tanaman.</td></tr>';document.getElementById('footerLaporanV16').textContent='SilviGrow V16 · Laporan otomatis dari data browser.'}
+function exportLaporanV16CSV(){if(!dataTanaman.length){alert('Belum ada data monitoring.');return}const rows=ringkasTanamanV7(),head=['No','Kode','Jenis','Monitoring','Perubahan Tinggi (cm)','Perubahan Diameter (cm)','Laju Tinggi (cm/bln)','Kondisi','Prioritas','Lokasi','Petak'],out=[head,...rows.map((x,i)=>[i+1,x.kode,x.jenis,x.monitoring,x.dh.toFixed(1),x.dd.toFixed(1),x.rate.toFixed(2),x.last.kondisi,prioritasV16(x.last),x.last.lokasi||'',x.last.petak||''])],csv='\\ufeff'+out.map(a=>a.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(';')).join('\\r\\n');download('SilviGrow_V16_Laporan.csv',csv,'text/csv;charset=utf-8');showToast('Laporan V16 berhasil diekspor.') }
+function cetakLaporanV16(){document.body.classList.add('v16-printing');window.print();setTimeout(()=>document.body.classList.remove('v16-printing'),500)}
+function renderAll(){analitikV8();jadwalV9();rekomendasiV10();auditV11();renderDashboardLokasiV6();renderFilterLokasi();tampilkanData();hitungDashboard();tampilkanGrafik();renderLokasi();renderRiwayatList();analisisKondisi();analisisPertumbuhanV7();renderPilihanPetaV7();tampilkanTindakLanjutV12();renderFilterPetaV13();renderPetaV13();jalankanValidasiV15()}
+
+loadData();resetForm();
+document.addEventListener("DOMContentLoaded",()=>{
+  try{ renderAll(); }catch(e){ console.error("Initial render warning:",e); }
+});
+
+/* ===== V17 FINAL SYSTEM ===== */
+function hitungStatusV17(){
+  const total=Array.isArray(dataTanaman)?dataTanaman.length:0;
+  const unik=new Set((dataTanaman||[]).map(d=>String(d.kode||'').trim()).filter(Boolean)).size;
+  const coords=(dataTanaman||[]).filter(d=>Number.isFinite(Number(d.latitude))&&Number.isFinite(Number(d.longitude))).length;
+  const validEl=document.getElementById('v15Valid');
+  const invalidEl=document.getElementById('v15Invalid');
+  const dupeEl=document.getElementById('v15Duplicate');
+  const scoreEl=document.getElementById('v11Skor');
+  const valid=validEl?Number(validEl.textContent)||0:0;
+  const invalid=invalidEl?Number(invalidEl.textContent)||0:0;
+  const dup=dupeEl?Number(dupeEl.textContent)||0:0;
+  const score=scoreEl?scoreEl.textContent:'-';
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  set('v17Total',total);set('v17Unik',unik);set('v17Koordinat',coords);set('v17Masalah',invalid+dup);
+  const status=invalid===0&&dup===0?'Sistem siap digunakan':'Perlu pemeriksaan data';
+  const el=document.getElementById('v17Status');
+  if(el)el.innerHTML=`<span class="v17-pill">${status}</span> · ${total} record · ${unik} tanaman unik · ${coords} record memiliki koordinat · skor kualitas data: <b>${score}</b>`;
+}
+function refreshSistemV17(){
+  try{renderAll();analisisLaporanV16();jalankanValidasiV15();hitungStatusV17();showToast('Sistem SilviGrow berhasil diperbarui.')}catch(e){console.error(e);alert('Pembaruan sistem mengalami kendala. Coba muat ulang halaman.')}
+}
+function backupFinalV17(){try{backupJSON();showToast('Backup data dibuat.')}catch(e){console.error(e);alert('Backup gagal dibuat.')}}
+function cetakRingkasanV17(){try{document.body.classList.add('v17-printing');window.print();setTimeout(()=>document.body.classList.remove('v17-printing'),600)}catch(e){window.print()}}
+
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+renderFilterPetaV13();
+renderPetaV13();
+</script>
+
+  <div class="box" id="laporanV16Box">
+    <div class="report-title"><h2>📑 Laporan Profesional V16</h2><div class="no-print"><button class="btn-info" onclick="exportLaporanV16CSV()">📊 Export Excel/CSV</button> <button class="btn-print" onclick="cetakLaporanV16()">🖨️ Cetak Laporan</button></div></div>
+    <div class="info">V16 menyusun ringkasan monitoring berdasarkan data SilviGrow: kondisi tanaman, pertumbuhan, lokasi/petak, kualitas data, dan tindak lanjut. Laporan diperbarui otomatis setiap kali data berubah.</div>
+    <div class="v16-grid">
+      <div class="v16-card"><div class="analysis-label">Total Monitoring</div><div class="v16-number" id="v16Total">0</div></div>
+      <div class="v16-card"><div class="analysis-label">Tanaman Unik</div><div class="v16-number" id="v16Unik">0</div></div>
+      <div class="v16-card"><div class="analysis-label">Kondisi Baik</div><div class="v16-number status-baik" id="v16Baik">0</div></div>
+      <div class="v16-card"><div class="analysis-label">Kondisi Sedang</div><div class="v16-number status-sedang" id="v16Sedang">0</div></div>
+      <div class="v16-card"><div class="analysis-label">Kondisi Buruk</div><div class="v16-number status-buruk" id="v16Buruk">0</div></div>
+      <div class="v16-card"><div class="analysis-label">Lokasi/Petak</div><div class="v16-number" id="v16Lokasi">0</div></div>
+    </div>
+    <div class="v16-report" id="laporanProfesionalV16"></div>
+    <div class="table-wrap" style="margin-top:15px"><table><thead><tr><th>No</th><th>Lokasi</th><th>Petak</th><th>Desa</th><th>Kecamatan</th><th>Luas (ha)</th><th>Jumlah Pohon</th><th>Kepadatan</th><th>Baik</th><th>Sedang</th><th>Buruk</th></tr></thead><tbody id="tabelLokasiV16"></tbody></table></div>
+    <div class="table-wrap" style="margin-top:15px"><table><thead><tr><th>No</th><th>Kode</th><th>Jenis</th><th>Monitoring</th><th>Perubahan Tinggi</th><th>Perubahan Diameter</th><th>Laju Tinggi</th><th>Kondisi Terakhir</th><th>Prioritas</th></tr></thead><tbody id="tabelTanamanV16"></tbody></table></div>
+    <div class="small v16-footer" id="footerLaporanV16"></div>
+  </div>
+<div class="box" id="validasiV15Box">
+ <div class="report-title"><h2>🛡️ Validasi & Keamanan Data V15</h2><span class="badge">V15</span></div>
+ <div class="info">Pemeriksaan dilakukan sebelum data disimpan. V15 membantu mencegah nilai tidak wajar, koordinat salah, tanggal tidak sesuai, dan penghapusan tidak sengaja.</div>
+ <div class="v15-grid" style="margin-top:12px">
+  <div class="v15-card"><div class="small">Data Valid</div><div class="v15-num v15-ok" id="v15Valid">0</div></div>
+  <div class="v15-card"><div class="small">Perlu Diperiksa</div><div class="v15-num v15-bad" id="v15Invalid">0</div></div>
+  <div class="v15-card"><div class="small">Duplikat</div><div class="v15-num v15-warn" id="v15Duplicate">0</div></div>
+  <div class="v15-card"><div class="small">Tanggal Masa Depan</div><div class="v15-num v15-info" id="v15Future">0</div></div>
+ </div>
+ <div class="toolbar no-print" style="margin-top:12px"><button class="btn-info" onclick="jalankanValidasiV15()">🔍 Validasi Sekarang</button><button class="btn-secondary" onclick="batalkanUndoV15()">↩️ Batalkan Hapus Terakhir</button></div>
+ <div class="table-wrap v15-table"><table><thead><tr><th>No</th><th>Kode</th><th>Tanggal</th><th>Status</th><th>Masalah</th></tr></thead><tbody id="tabelValidasiV15"></tbody></table></div>
+</div>
+
+<div class="box" id="sistemV17Box">
+  <div class="report-title"><h2>🚀 Pusat Sistem SilviGrow V17</h2><span class="badge">V17 FINALISASI</span></div>
+  <div class="info">V17 menyatukan dashboard, monitoring, analitik, peta, audit kualitas data, tindak lanjut, dan laporan. Fokus versi ini adalah konsistensi penggunaan dan pemeriksaan akhir sistem.</div>
+  <div class="v17-grid">
+    <div class="v17-card"><div class="small">Total Record</div><div class="v17-num" id="v17Total">0</div></div>
+    <div class="v17-card"><div class="small">Tanaman Unik</div><div class="v17-num" id="v17Unik">0</div></div>
+    <div class="v17-card"><div class="small">Record Berkoordinat</div><div class="v17-num v17-blue" id="v17Koordinat">0</div></div>
+    <div class="v17-card"><div class="small">Masalah Terdeteksi</div><div class="v17-num v17-warn" id="v17Masalah">0</div></div>
+  </div>
+  <div class="v17-status" id="v17Status">Menyiapkan status sistem...</div>
+  <div class="v17-actions no-print">
+    <button class="btn-info" onclick="refreshSistemV17()">🔄 Perbarui Sistem</button>
+    <button class="btn-secondary" onclick="backupFinalV17()">💾 Backup Data</button>
+    <button class="btn-print" onclick="cetakRingkasanV17()">🖨️ Cetak Ringkasan</button>
+  </div>
+  <div class="small" style="margin-top:12px">SilviGrow V17 · Arsip versi sebelumnya. SilviGrow V18 adalah Final Release.</div>
+</div>
+
+
+
+  <div class="v18-box" id="finalReleaseV18">
+    <div class="v18-head">
+      <h2>🏁 SilviGrow V18 — Final Release</h2>
+      <div class="v18-badge">VERSI FINAL</div>
+    </div>
+    <div class="v18-info">V18 adalah Final Release SilviGrow. Sistem membaca data monitoring yang sama dengan modul utama, memeriksa kesiapan data dan integritas fungsi, serta menyediakan backup final sebelum aplikasi digunakan untuk monitoring, praktikum, atau dokumentasi.</div>
+    <div class="v18-grid">
+      <div class="v18-card"><div class="v18-label">Total Record</div><div class="v18-num" id="v18Total">0</div></div>
+      <div class="v18-card"><div class="v18-label">Tanaman Unik</div><div class="v18-num" id="v18Unik">0</div></div>
+      <div class="v18-card"><div class="v18-label">Berkoordinat</div><div class="v18-num" id="v18Koordinat">0</div></div>
+      <div class="v18-card"><div class="v18-label">Kelengkapan Koordinat</div><div class="v18-num" id="v18CoordPct">0%</div></div>
+    </div>
+    <h3 style="margin-bottom:8px">Pemeriksaan Kesiapan</h3>
+    <div class="v18-check" id="v18Checklist"></div>
+    <div class="v18-actions v18-no-print">
+      <button class="btn-success" onclick="refreshFinalV18()">🔄 Periksa Sistem</button>
+      <button class="btn-info" onclick="backupFinalV18()">💾 Backup Final JSON</button>
+      <label class="btn-warning">📂 Pulihkan JSON<input type="file" accept="application/json,.json" onchange="restoreFinalV18(event)" style="display:none"></label>
+      <button class="btn-print" onclick="printFinalV18()">🖨️ Cetak Status Final</button>
+    </div>
+    <div class="v18-note">Backup JSON menyimpan data monitoring di browser ini. Simpan file backup di tempat aman sebelum menghapus atau memindahkan data.</div>
+    <div class="v18-print-only" id="v18PrintDate"></div>
+  </div>
+
+<script>
+/* ===== V18 FINAL RELEASE ===== */
+function finalDataV18(){return Array.isArray(dataTanaman)?dataTanaman:[]}
+function refreshFinalV18(){
+  try{
+    // Jalankan pemeriksaan secara berurutan tanpa renderAll(), karena renderAll() juga
+    // menginisialisasi ulang modul peta dan dapat menimbulkan konflik pada halaman lokal.
+    if(typeof jalankanValidasiV15==='function') jalankanValidasiV15();
+    if(typeof analisisLaporanV16==='function') analisisLaporanV16();
+    if(typeof hitungStatusV17==='function') hitungStatusV17();
+    const d=finalDataV18(), total=d.length;
+    const unik=new Set(d.map(x=>String(x.kode||'').trim()).filter(Boolean)).size;
+    const coords=d.filter(x=>String(x.latitude??'').trim()!==''&&String(x.longitude??'').trim()!=='').length;
+    const pct=total?Math.round(coords/total*100):0;
+    const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+    set('v18Total',total);set('v18Unik',unik);set('v18Koordinat',coords);set('v18CoordPct',pct+'%');
+    const invalid=Number(document.getElementById('v15Invalid')?.textContent)||0;
+    const dup=Number(document.getElementById('v15Duplicate')?.textContent)||0;
+    const future=Number(document.getElementById('v15Future')?.textContent)||0;
+    const checks=[
+      ['Data monitoring',total>0?'Siap':'Belum ada data',total>0],
+      ['Kode tanaman',d.every(x=>String(x.kode||'').trim()!=='')?'Lengkap':'Ada kode kosong',d.every(x=>String(x.kode||'').trim()!=='')],
+      ['Koordinat GPS',total===0||coords===total? 'Lengkap':`${total-coords} record belum lengkap`,total===0||coords===total],
+      ['Audit validasi',invalid===0?'Tidak ada masalah terdeteksi':`${invalid} record perlu diperiksa`,invalid===0],
+      ['Duplikasi',dup===0?'Tidak ada duplikat':'Ada duplikat kode + tanggal',dup===0],
+      ['Tanggal masa depan',future===0?'Tidak ditemukan':'Perlu diperiksa',future===0],
+      ['Backup', 'Backup dapat dibuat kapan saja', true],
+      ['Peta & lokasi', 'Modul peta terpasang', typeof renderPetaV13==='function']
+    ];
+    const box=document.getElementById('v18Checklist');
+    if(box) box.innerHTML=checks.map(c=>`<div class="v18-item"><div>${c[2]?'✅':'⚠️'} <span class="${c[2]?'v18-ok':'v18-warn'}">${c[0]}</span></div><div style="margin-top:5px;font-size:12px">${c[1]}</div></div>`).join('');
+    if(typeof showToast==='function') showToast('Pemeriksaan V18 selesai.');
+  }catch(e){console.error(e);alert('Pemeriksaan V18 mengalami kendala. Muat ulang halaman lalu coba lagi.');}
+}
+function backupFinalV18(){
+  try{
+    const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+    const payload=JSON.stringify(finalDataV18(),null,2);
+    download('SilviGrow_V18_Backup_'+stamp+'.json',payload,'application/json');
+    if(typeof showToast==='function') showToast('Backup final V18 berhasil dibuat.');
+  }catch(e){console.error(e);alert('Backup final gagal dibuat.');}
+}
+function restoreFinalV18(event){
+  const f=event.target.files&&event.target.files[0]; if(!f)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const parsed=JSON.parse(reader.result);
+      if(!Array.isArray(parsed)) throw new Error('Format backup harus berupa array data.');
+      if(!confirm('Pulihkan backup ini? Data monitoring saat ini akan diganti.')) return;
+      if(typeof importJSON==='function'){
+        /* Reuse the application's normal import validation/normalization. */
+        const dt=new DataTransfer();dt.items.add(f);const input=document.createElement('input');input.type='file';input.files=dt.files;importJSON({target:input});
+      }else throw new Error('Modul import tidak tersedia.');
+    }catch(e){console.error(e);alert('Backup JSON tidak valid atau gagal dipulihkan.');}
+    event.target.value='';
+  };
+  reader.readAsText(f);
+}
+function printFinalV18(){
+  const e=document.getElementById('v18PrintDate');if(e)e.textContent='Dicetak: '+new Date().toLocaleString('id-ID');
+  document.body.classList.add('v18-printing');
+  window.print();
+  setTimeout(()=>document.body.classList.remove('v18-printing'),700);
+}
+document.addEventListener("DOMContentLoaded",()=>{ refreshFinalV18(); });
+</script>
+
+</body>
+</html>
